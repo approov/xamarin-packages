@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>ApproovHttpClient-Platform-Specific</id>
+    <version>1.0.4</version>
+    <title>Approov</title>
+    <authors>ivol</authors>
+    <owners>Criticalblue</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>http://approov.io/</projectUrl>
+    <icon>approov.png</icon>
+    <description>Custom HttpClient implementation using Approov API protection</description>
+    <releaseNotes>Allow DelegatingHandler chaining</releaseNotes>
+    <copyright>Copyright Criticalblue 2020</copyright>
+    <tags>API Protection Attestation Mobile</tags>
+    <dependencies>
+        <group targetFramework="MonoAndroid10">
+            <dependency id="ApproovHttpClient" version="1.0.2" />
+            <dependency id="ApproovSDK" version="2.3.0.6" />
+        </group>
+        <group targetFramework="Xamarin.iOS10">
+            <dependency id="ApproovHttpClient" version="1.0.2" />
+            <dependency id="ApproovSDK" version="2.3.0.6" />
+        </group>
+    </dependencies>
+  </metadata>
+  <!-- Insert below <metadata> element -->
+<files>
+    <!-- Cross-platform reference assemblies -->
+        <file src="approov.png" target="" />
+    <!-- iOS reference assemblies -->
+        <file src="ApproovHttpClient.iOS\bin\Release\ApproovHttpClient.iOS.dll" target="lib/Xamarin.iOS10/ApproovHttpClient.iOS.dll" />
+    <!-- Android reference assemblies -->
+        <file src="ApproovHttpClient.Android\bin\Release\ApproovHttpClient.Android.dll" target="lib/MonoAndroid10/ApproovHttpClient.Android.dll" />
+</files>
+
+</package>
