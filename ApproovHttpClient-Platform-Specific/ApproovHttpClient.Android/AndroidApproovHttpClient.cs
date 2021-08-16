@@ -170,6 +170,9 @@ namespace Approov
             // Invoke fetch token sync
             var approovResult = FetchApproovTokenAndWait(url);
 
+            // Hold the fetch status in a variable
+            var aFetchStatus = approovResult.Status;
+
             // Log result
             Console.WriteLine(TAG + "Approov token for host " + url + " : " + approovResult.LoggableToken);
 
@@ -180,7 +183,7 @@ namespace Approov
             }
 
             // Check the status of the Approov token fetch
-            if (approovResult.Status == TokenFetchStatus.Success)
+            if (aFetchStatus == TokenFetchStatus.Success)
             {
                 // we successfully obtained a token so add it to the header for the HttpClient or HttpRequestMessage
                 if (message == null)
@@ -196,22 +199,22 @@ namespace Approov
                     message.Headers.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
                 }
             }
-            else if ((approovResult.Status == TokenFetchStatus.NoNetwork) ||
-                   (approovResult.Status == TokenFetchStatus.PoorNetwork) ||
-                   (approovResult.Status == TokenFetchStatus.MitmDetected))
+            else if ((aFetchStatus == TokenFetchStatus.NoNetwork) ||
+                   (aFetchStatus == TokenFetchStatus.PoorNetwork) ||
+                   (aFetchStatus == TokenFetchStatus.MitmDetected))
             {
                 // Must not proceed with network request and inform user a retry is needed
                 throw new ApproovSDKException(TAG + "Retry attempt needed. " + approovResult.LoggableToken, true);
             }
-            else if ((approovResult.Status == TokenFetchStatus.UnknownUrl) ||
-                 (approovResult.Status == TokenFetchStatus.UnprotectedUrl) ||
-                 (approovResult.Status == TokenFetchStatus.NoApproovService))
+            else if ((aFetchStatus == TokenFetchStatus.UnknownUrl) ||
+                 (aFetchStatus == TokenFetchStatus.UnprotectedUrl) ||
+                 (aFetchStatus == TokenFetchStatus.NoApproovService))
             {
                 Console.WriteLine(TAG + "Will continue without Approov-Token");
             }
             else
             {
-                throw new ApproovSDKException("Unknown approov token fetch result " + approovResult.Status);
+                throw new ApproovSDKException("Unknown approov token fetch result " + aFetchStatus);
             }
 
         }
