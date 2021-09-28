@@ -44,11 +44,11 @@
   </metadata>
   <files>
         <!-- Include everything in \build -->
-        <file src="Original/build/**" target="build" />
-        <file src="Original/buildTransitive/**" target="buildTransitive" />
-        <file src="Original/lib/**" target="lib" />
+        <file src="build/**" target="build" />
+        <file src="buildTransitive/**" target="buildTransitive" />
+        <file src="lib/**" target="lib" />
         <!-- Other files -->
-        <file src="Original/refit_logo.png" target="" />
+        <file src="refit_logo.png" target="" />
         <!-- ... -->
     </files>
 </package>

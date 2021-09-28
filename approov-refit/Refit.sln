@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0E99249A-FB80-4C60-8FD3-13820E853FF7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refit", "Refit\Refit.csproj", "{613670B3-BBC6-4479-A3D6-B6A6E80D94FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApproovRefit", "Refit\ApproovRefit.csproj", "{613670B3-BBC6-4479-A3D6-B6A6E80D94FD}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DE66466A-4912-4352-B973-E544D3073DDC} = {DE66466A-4912-4352-B973-E544D3073DDC}
 	EndProjectSection

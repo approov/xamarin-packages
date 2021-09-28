@@ -5,13 +5,42 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\InterfaceStubGenerator.BuildTasks\</UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/master/approov-refit</RepositoryUrl>
+    <PackageIcon>approov_logo.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageProjectUrl>https://approov.io</PackageProjectUrl>
+    <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support
+Based on Refit (https://github.com/reactiveui/refit)</Description>
+    <Company>Critical Blue</Company>
+    <Authors>ivol@criticalblue.com</Authors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Condition="'$(TargetFramework)' == 'net461' " Include="Microsoft.Build.Tasks.Core" Version="14.3" PrivateAssets="all" />
+    <None Remove="C:\Users\ivo\source\repos\private\approov-refit\refit_logo.png" />
+    <None Include="../">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="../approov_logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\approov_logo.png" Link="approov_logo.png">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Condition="'$(TargetFramework)' == 'net461' " Include="Microsoft.Build.Tasks.Core" Version="16.11.0" PrivateAssets="all" />
     <PackageReference Condition="'$(TargetFramework)' == 'netcoreapp2.1' " Include="Microsoft.Build.Tasks.Core" Version="15.1.548" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InterfaceStubGenerator.Core\InterfaceStubGenerator.Core.csproj" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63" />
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.4.240" />
   </ItemGroup>
   <Target Name="SetBuildVer" AfterTargets="GetBuildVersion" BeforeTargets="SetCloudBuildVersionVars;SetCloudBuildNumberWithVersion">
     <PropertyGroup>

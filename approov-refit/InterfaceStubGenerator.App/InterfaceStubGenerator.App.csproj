@@ -6,7 +6,28 @@
     <FileUpgradeFlags>40</FileUpgradeFlags>
     <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\InterfaceStubGenerator.App\</UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
+    <PackageIcon>approov_logo.png</PackageIcon>
+    <PackageIconUrl />
+    <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support
+Based on Refit (https://github.com/reactiveui/refit)</Description>
+    <Authors>ivol@criticalblue.com</Authors>
+    <Company>Critical Blue</Company>
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/master/approov-refit</RepositoryUrl>
+    <PackageProjectUrl>https://approov.io</PackageProjectUrl>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="C:\Users\ivo\source\repos\private\approov-refit\refit_logo.png" />
+    <None Include="\approov_logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\approov_logo.png" Link="approov_logo.png">
+      <PackagePath></PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InterfaceStubGenerator.Core\InterfaceStubGenerator.Core.csproj" />
   </ItemGroup>
