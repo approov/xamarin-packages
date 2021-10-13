@@ -1,62 +1,56 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Product>ApproovRefit (netstandard2.0)</Product>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net461</TargetFrameworks>
+    <Product>Refit ($(TargetFramework))</Product>
+    <TargetFrameworks>net5.0;netstandard2.0;netstandard2.1;net461</TargetFrameworks>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
-    <DebugType>embedded</DebugType>
-    <FileUpgradeFlags>40</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\Refit\</UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <AssemblyName>ApproovRefit</AssemblyName>
-    <RootNamespace>Refit</RootNamespace>
+  
+    <Nullable>enable</Nullable>
+  
     <Authors>ivol@criticalblue.com</Authors>
-    <Company>Critical Blue</Company>
+  
     <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support.
 Based on Refit (https://github.com/reactiveui/refit)</Description>
+  
+    <Company>CriticalBlue</Company>
+  
     <PackageProjectUrl>https://approov.io</PackageProjectUrl>
+  
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/release/6.0.94/approov-refit</RepositoryUrl>
+  
     <PackageIcon>approov_logo.png</PackageIcon>
+  
     <PackageIconUrl />
-    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/master/approov-refit</RepositoryUrl>
-    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.Text.Json" Version="5.0.2" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <Reference Include="System.Web" />
-    <Reference Include="System.Net.Http" />
-  </ItemGroup>
-  <ItemGroup Label="Package">
+    <None Remove="C:\Users\ivo\source\repos\private\refit-6.0.94\refit_logo.png" />
     <None Include="..\approov_logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="targets\refit.targets" PackagePath="build\net461" Pack="true" />
-    <None Include="targets\refit.targets" PackagePath="buildTransitive\net461" Pack="true" />
-    <None Include="targets\refit.targets" PackagePath="build\netstandard2.0" Pack="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
+    <PackageReference Condition="'$(TargetFramework)' != 'net5.0'" Include="System.Text.Json" Version="5.0.2" />
+    <PackageReference Include="System.Net.Http.Json" Version="5.0.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">    
+    <Reference Include="System.Web" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <ProjectReference Include="..\InterfaceStubGenerator.Core\InterfaceStubGenerator.Core.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup Label="Package">        
     <None Include="targets\refit.targets" PackagePath="buildTransitive\netstandard2.0" Pack="true" />
-    <None Include="..\InterfaceStubGenerator.BuildTasks\bin\$(Configuration)\net461\publish\**\*.*" LinkBase="build\MSBuildFull46" PackagePath="build\MSBuildFull46" Pack="true" />
-    <None Include="..\InterfaceStubGenerator.BuildTasks\bin\$(Configuration)\netcoreapp2.1\publish\**\*.*" LinkBase="build\MSBuildCore20" PackagePath="build\MSBuildCore20" Pack="true" />
+    <None Include="targets\refit.props" PackagePath="buildTransitive\netstandard2.0" Pack="true" />
+
+    <!-- We need this one to catch older clients -->
+    <None Include="targets\refit.targets" PackagePath="build\netstandard2.0" Pack="true" />
+    
+    <None Include="..\InterfaceStubGenerator.Core\bin\$(Configuration)\netstandard2.0\InterfaceStubGenerator.Core.dll" PackagePath="analyzers\cs\" Pack="true" Visible="false" />
   </ItemGroup>
-  <ItemGroup>
-    <None Remove="C:\Users\ivo\source\repos\private\approov-refit\refit_logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.4.240" />
-  </ItemGroup>
-  <Target Name="BuildAndPublishStubGenerator" BeforeTargets="CoreBuild" Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-      <RefitExecCmd46>dotnet publish "$(MSBuildThisFileDirectory)..\InterfaceStubGenerator.BuildTasks\InterfaceStubGenerator.BuildTasks.csproj" -c $(Configuration) -f net461</RefitExecCmd46>
-      <RefitExecCmd20>dotnet publish "$(MSBuildThisFileDirectory)..\InterfaceStubGenerator.BuildTasks\InterfaceStubGenerator.BuildTasks.csproj" -c $(Configuration) -f netcoreapp2.1</RefitExecCmd20>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-      <RefitExecCmd46>dotnet publish "$(MSBuildThisFileDirectory)../InterfaceStubGenerator.BuildTasks/InterfaceStubGenerator.BuildTasks.csproj" -c $(Configuration) -f net461</RefitExecCmd46>
-      <RefitExecCmd20>dotnet publish "$(MSBuildThisFileDirectory)../InterfaceStubGenerator.BuildTasks/InterfaceStubGenerator.BuildTasks.csproj" -c $(Configuration) -f netcoreapp2.1</RefitExecCmd20>
-    </PropertyGroup>
-    <Exec Command="$(RefitExecCmd46)" />
-    <Exec Command="$(RefitExecCmd20)" />
-  </Target>
+
 </Project>

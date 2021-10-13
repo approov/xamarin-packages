@@ -1,47 +1,41 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>Refit.Generator</RootNamespace>
     <IsPackable>false</IsPackable>
     <AssemblyOriginatorKeyFile>..\buildtask.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <FileUpgradeFlags>40</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\InterfaceStubGenerator.Core\</UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <Authors>ivol@criticalblue.com</Authors>
-    <Company>Critical Blue</Company>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <Nullable>enable</Nullable>
     <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support.
 Based on Refit (https://github.com/reactiveui/refit)</Description>
-    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/master/approov-refit</RepositoryUrl>
+    <Company>CriticalBlue</Company>
+    <Authors>ivol@criticalblue.com</Authors>
     <PackageProjectUrl>https://approov.io</PackageProjectUrl>
+    <PackageIcon>approov_logo.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/release/6.0.94/approov-refit</RepositoryUrl>
   </PropertyGroup>
+
   <ItemGroup>
-    <None Remove="C:\Users\ivo\source\repos\private\approov-refit\refit_logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
-    <PackageReference Include="Nustache" Version="1.16.0.10" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="GeneratedInterfaceStubTemplate.mustache">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\approov_logo.png" Link="approov_logo.png">
-      <PackagePath></PackagePath>
+    <None Remove="C:\Users\ivo\source\repos\private\refit-6.0.94\refit_logo.png" />
+    <None Include="..\approov_logo.png">
       <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.4.240" />
+    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
   </ItemGroup>
+
   <Target Name="SetBuildVer" AfterTargets="GetBuildVersion" BeforeTargets="SetCloudBuildVersionVars;SetCloudBuildNumberWithVersion">
-    <PropertyGroup>
+    <PropertyGroup>      
       <Version>$(BuildVersion)</Version>
       <AssemblyVersion>$(BuildVersionSimple)</AssemblyVersion>
     </PropertyGroup>
   </Target>
+
 </Project>

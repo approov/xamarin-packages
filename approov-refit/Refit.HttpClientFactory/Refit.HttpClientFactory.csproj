@@ -1,39 +1,35 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Product>Refit HTTP Client Factory Extensions</Product>
+    <Product>ApproovRefit HTTP Client Factory Extensions</Product>
     <Description>Refit HTTP Client Factory Extensions with Approov SDK support.
 Based on Refit (https://github.com/reactiveui/refit)</Description>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <DebugType>embedded</DebugType>
-    <FileUpgradeFlags>40</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\Refit.HttpClientFactory\</UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
     <Authors>ivol@criticalblue.com</Authors>
-    <Company>Critical Blue</Company>
+    <Company>CriticalBlue</Company>
     <PackageProjectUrl>https://approov.io</PackageProjectUrl>
     <PackageIcon>approov_logo.png</PackageIcon>
     <PackageIconUrl />
-    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/master/approov-refit</RepositoryUrl>
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/release/6.0.94/approov-refit</RepositoryUrl>
   </PropertyGroup>
+
   <ItemGroup>
-    <None Remove="C:\Users\ivo\source\repos\private\approov-refit\refit_logo.png" />
+    <None Remove="C:\Users\ivo\source\repos\private\refit-6.0.94\refit_logo.png" />
     <None Include="..\approov_logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\approov_logo.png" Link="approov_logo.png">
-      <PackagePath></PackagePath>
-      <Pack>True</Pack>
-    </None>
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Refit\ApproovRefit.csproj" PrivateAssets="Analyzers" />
+    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.63" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.4.240" />
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Update="Microsoft.Extensions.Http" Version="3.1.11" />
   </ItemGroup>
+
 </Project>

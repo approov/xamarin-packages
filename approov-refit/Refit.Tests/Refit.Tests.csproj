@@ -1,77 +1,51 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Refit\targets\refit.props" />
+  
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net5.0;netcoreapp2.1;netcoreapp3.1;net461</TargetFrameworks>
     <Deterministic>false</Deterministic>
-    <FileUpgradeFlags>40</FileUpgradeFlags>
-    <UpgradeBackupLocation>C:\Users\ivo\Desktop\refit-master\Backup\Refit.Tests\</UpgradeBackupLocation>
-    <OldToolsVersion>2.0</OldToolsVersion>
-    <!-- Some tests rely on CallerFilePath -->
+    <Authors>ivol@criticalblue.com</Authors>
+    <Company>CriticalBlue</Company>
+    <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support.
+Based on Refit (https://github.com/reactiveui/refit)</Description>
+    <PackageProjectUrl>https://approov.io</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/release/6.0.94/approov-refit</RepositoryUrl>
+    <PackageIcon>approov_logo.png</PackageIcon>
+    <PackageIconUrl /> <!-- Some tests rely on CallerFilePath -->
   </PropertyGroup>
+  
+  <ItemGroup>
+    <None Remove="C:\Users\ivo\source\repos\private\refit-6.0.94\refit_logo.png" />
+    <None Include="..\approov_logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Test Files\Test.pdf" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
     <PackageReference Include="coverlet.collector" Version="3.1.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />    
+    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.SourceGenerators.Testing.XUnit" Version="1.1.0" />
     <PackageReference Include="RichardSzalay.MockHttp" Version="6.0.0" />
-    <ProjectReference Include="..\InterfaceStubGenerator.App\InterfaceStubGenerator.App.csproj" />
     <ProjectReference Include="..\Refit.HttpClientFactory\Refit.HttpClientFactory.csproj" />
-    <ProjectReference Include="..\Refit\ApproovRefit.csproj" />
+    <ProjectReference Include="..\Refit.Newtonsoft.Json\Refit.Newtonsoft.Json.csproj" />
+    <ProjectReference Include="..\InterfaceStubGenerator.Core\InterfaceStubGenerator.Core.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
   </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net461' ">
     <Reference Include="System.Net.Http" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="RefitStubs.*.cs" />
-    <Compile Condition="'$(TargetFramework)' == 'net461' " Remove="RefitStubs.NetCore*.cs" />
-    <Compile Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == 'netcoreapp3.1' " Remove="RefitStubs.Net46.cs" />
-    <Compile Condition="'$(TargetFramework)' == 'netcoreapp2.1' " Remove="RefitStubs.NetCore3.cs" />
-    <Compile Condition="'$(TargetFramework)' == 'netcoreapp3.1' " Remove="RefitStubs.NetCore2.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.4.240" />
-  </ItemGroup>
-  <Target Name="GenerateRefitStubsFull" Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildRuntimeType)' != 'Core' " BeforeTargets="CoreCompile">
-    <PropertyGroup>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'net461' ">$(MSBuildThisFileDirectory)RefitStubs.Net46.cs</OutputStubsFile>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'netcoreapp2.1' ">$(MSBuildThisFileDirectory)RefitStubs.NetCore2.cs</OutputStubsFile>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">$(MSBuildThisFileDirectory)RefitStubs.NetCore3.cs</OutputStubsFile>
-      <RefitParameterFile>$(MSBuildThisFileDirectory)$(IntermediateOutputPath)RefitParams.rsp</RefitParameterFile>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(RefitParameterFile)" Lines="@(Compile)" Overwrite="true" />
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-      <RefitExecCmd>"$(MSBuildThisFileDirectory)..\InterfaceStubGenerator.App\bin\$(ConfigurationName)\net461\InterfaceStubGenerator.App.exe" "$(OutputStubsFile)" "$(MSBuildProjectDirectory)" "$(RefitParameterFile)" "$(RootNamespace)"</RefitExecCmd>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-      <RefitExecCmd>mono "$(MSBuildThisFileDirectory)../InterfaceStubGenerator.App/bin/$(Configuration)/net461/InterfaceStubGenerator.App.exe" "$(OutputStubsFile)" "$(MSBuildProjectDirectory)" "$(RefitParameterFile)" "$(RootNamespace)"</RefitExecCmd>
-    </PropertyGroup>
-    <Message Text="Executing: $(RefitExecCmd)" Importance="High" />
-    <Exec Command="$(RefitExecCmd)" />
-    <Message Text="Processed Refit Stubs" />
-  </Target>
-  <Target Name="GenerateRefitStubsCore" Condition="'$(DesignTimeBuild)' != 'true' and '$(MSBuildRuntimeType)' == 'Core' " BeforeTargets="CoreCompile">
-    <PropertyGroup>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'net461' ">$(MSBuildThisFileDirectory)RefitStubs.Net46.cs</OutputStubsFile>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'netcoreapp2.1' ">$(MSBuildThisFileDirectory)RefitStubs.NetCore2.cs</OutputStubsFile>
-      <OutputStubsFile Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">$(MSBuildThisFileDirectory)RefitStubs.NetCore3.cs</OutputStubsFile>
-      <RefitParameterFile>$(MSBuildThisFileDirectory)$(IntermediateOutputPath)RefitParams.rsp</RefitParameterFile>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(RefitParameterFile)" Lines="@(Compile)" Overwrite="true" />
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-      <RefitExecCmd>dotnet "$(MSBuildThisFileDirectory)..\InterfaceStubGenerator.App\bin\$(ConfigurationName)\netcoreapp2.1\InterfaceStubGenerator.App.dll" "$(OutputStubsFile)" "$(MSBuildProjectDirectory)" "$(RefitParameterFile)" "$(RootNamespace)"</RefitExecCmd>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-      <RefitExecCmd>dotnet "$(MSBuildThisFileDirectory)../InterfaceStubGenerator.App/bin/$(Configuration)/netcoreapp2.1/InterfaceStubGenerator.App.dll" "$(OutputStubsFile)" "$(MSBuildProjectDirectory)" "$(RefitParameterFile)" "$(RootNamespace)"</RefitExecCmd>
-    </PropertyGroup>
-    <Message Text="Executing: $(RefitExecCmd)" Importance="High" />
-    <Exec Command="$(RefitExecCmd)" />
-    <Message Text="Processed Refit Stubs" />
-  </Target>
+
+  <Import Project="..\Refit\targets\refit.targets" />
 </Project>
