@@ -1,0 +1,25 @@
+﻿<Properties NuGet.AddPackagesDialog.IncludePrerelease="True" StartupConfiguration="{D7F1CC47-26DC-436D-B623-725294BF4767}|Default">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="AppproovHttpClient-Platform-Specific" expanded="True">
+            <Node name="ApproovHttpClient.iOS" expanded="True">
+              <Node name="Packages" expanded="True" selected="True" />
+            </Node>
+            <Node name="ApproovHttpClientAndroid" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <Xamarin.Addins.Core.Project ActiveDebugTarget="Android.SelectDevice" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.ItemProperties.ApproovHttpClientAndroid PreferredExecutionTarget="Android.SelectDevice" />
+</Properties>

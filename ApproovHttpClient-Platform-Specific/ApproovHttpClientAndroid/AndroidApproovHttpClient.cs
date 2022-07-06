@@ -23,41 +23,55 @@ using System.Threading.Tasks;
 using System.IO;
 using Android.Content;
 using Android.Content.Res;
-using System.Collections.Generic;
+using System.Collections;
 using static Com.Criticalblue.Approovsdk.Approov;
+using System.Collections.Generic;
+using Com.Criticalblue.Approovutils;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace Approov
 {
+    //[Android.Runtime.Preserve(AllMembers = true)]
     public class AndroidApproovHttpClient : ApproovHttpClient
     {
-        public AndroidApproovHttpClient() : this(new HttpClientHandler()) { }
+        /* Creates new Android Approov HttpClient
+         * @param   approov config string
+         */
+        public AndroidApproovHttpClient(string config) : this(new HttpClientHandler(), config) { }
 
-        public AndroidApproovHttpClient(HttpMessageHandler handler) : base(handler)
+        /* Creates new Android Approov HttpClient
+         * @param   custom message handler
+         * @param   approov config string
+         */
+        public AndroidApproovHttpClient(HttpMessageHandler handler, string config) : base(handler)
         {
-            // 1. Initialize Approov SDK
-            if (!isApproovSDKInitialized)
+            lock (approovInitializationLock)
             {
-                string initialConfigString = ReadInitialApproovConfig();
-                if (initialConfigString == null)
+                // 1. Initialize Approov SDK
+                if (!isApproovSDKInitialized)
                 {
-                    throw new ApproovSDKException(TAG + "Error loading initial configuration string.");
-                }
-                string dynamicConfigString = ReadDynamicApproovConfig();
-                try
-                {
-                    Initialize(Android.App.Application.Context, initialConfigString, dynamicConfigString, null);
-                    isApproovSDKInitialized = true;
-                    Console.WriteLine(TAG + "SDK initialized");
-                    // if we didn't have a dynamic configuration (after the first launch on the app) then
-                    // we fetch the latest and write it to local storage now
-                    if (dynamicConfigString == null)
+                    if (config == null)
                     {
-                        StoreApproovDynamicConfig(FetchConfig());
+                        throw new ApproovSDKException(TAG + "Error loading initial configuration string.");
                     }
-                }
-                catch (Exception e)
-                {
-                    throw new ApproovSDKException(TAG + "Initialization failed: " + e.Message);
+                    string dynamicConfigString = ReadDynamicApproovConfig();
+                    try
+                    {
+                        Initialize(Android.App.Application.Context, config, dynamicConfigString, null);
+                        isApproovSDKInitialized = true;
+                        Console.WriteLine(TAG + "SDK initialized");
+                        // if we didn't have a dynamic configuration (after the first launch on the app) then
+                        // we fetch the latest and write it to local storage now
+                        if (dynamicConfigString == null)
+                        {
+                            StoreApproovDynamicConfig(FetchConfig());
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ApproovSDKException(TAG + "Initialization failed: " + e.Message);
+                    }
                 }
             }
         }
@@ -71,28 +85,6 @@ namespace Approov
             ISharedPreferences prefs = Android.App.Application.Context.GetSharedPreferences(ApproovPreferencesKey, 0);
             Console.WriteLine(TAG + "Dynamic configuration loaded");
             return prefs.GetString(ApproovDynamicKey, null);
-        }
-
-        /*
-        *  Reads the initial configuration file for the Approov SDK
-        *  The file defined as kApproovInitialKey.kConfigFileExtension
-        *  is read from the app bundle main directory
-        */
-        string ReadInitialApproovConfig()
-        {
-            string content = null;
-            try
-            {
-                // Read the contents of our asset
-                AssetManager assets = Android.App.Application.Context.Assets;
-                using StreamReader sr = new StreamReader(assets.Open(ApproovInitialKey + ConfigFileExtension));
-                content = sr.ReadToEnd();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(TAG + "Exception attempting to read initial config file. " + e.Message);
-            }
-            return content;
         }
 
 
@@ -118,9 +110,12 @@ namespace Approov
         */
         public void PrefetchApproovToken()
         {
-            if (isApproovSDKInitialized)
+            lock (approovInitializationLock)
             {
-                _ = HandleTokenFetchAsync();
+                if (isApproovSDKInitialized)
+                {
+                    _ = HandleTokenFetchAsync();
+                }
             }
         }
 
@@ -188,6 +183,14 @@ namespace Approov
                 // we successfully obtained a token so add it to the header for the HttpClient or HttpRequestMessage
                 if (message == null)
                 {
+                    if (DefaultRequestHeaders.Contains(ApproovTokenHeader))
+                    {
+                        if (!DefaultRequestHeaders.Remove(ApproovTokenHeader))
+                        {
+                            // We could not remove the original header
+                            throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
+                        }
+                    }
                     DefaultRequestHeaders.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
                 }
                 else
@@ -263,35 +266,47 @@ namespace Approov
                 return false;
             if (chain.ChainElements.Count == 0)
                 throw new ApproovSDKException(TAG + "Empty certificate chain from callback function.");
+            JObject allPins;
             // 1. Get Approov pins
-            IDictionary<string, IList<string>> allPins = GetPins(kShaTypeString);
+            var aString = ApproovPinsToJson.JsonStringFromApproovSDKPins();
+            // Convert the JSON String to its object representation
+            try
+            {
+                JObject jsonContents = JObject.Parse(aString);
+                allPins = jsonContents;
+            }
+            catch (JsonReaderException e) {
+                throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK " + e.Message);
+            }
+
+            //IDictionary<string, IList<string>> allPins = (IDictionary<string, IList<string>>)GetPins(kShaTypeString);
             if (allPins == null)
             {
                 throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK");
             }
 
             // 2. Get hostname => sender.RequestUri
-            IList<string> allPinsForHost;
             string hostname = sender.RequestUri.Host;
             if (!allPins.ContainsKey(hostname))
             {
                 // 4. Host is not being pinned and we have succesfully checked certificate chain
                 return true;
             }
-            else
-            {
-                // 3. Check if host is being pinned and has no pins set
-                bool status = allPins.TryGetValue(hostname, out allPinsForHost);
-                if (!status)
+            
+            // 3. Check if host is being pinned and has no pins set
+            //bool status = allPins.TryGetValue(hostname, out allPinsForHost);
+            bool status = allPins.ContainsKey(hostname);
+            if (!status)
                 {
                     throw new ApproovSDKException(TAG + "Unable to obtain pin set from SDK for host " + hostname);
                 }
+                JArray allPinsForHost = (JArray)allPins[hostname];
                 if (allPinsForHost.Count == 0)
                 {
                     // Any pins for host allowed
                     return true;
                 }
-            }
+      
             // 5. Iterate over certificate chain and attempt to match PK pin to one in Approov SDK
             foreach (X509ChainElement element in chain.ChainElements)
             {
@@ -321,6 +336,7 @@ namespace Approov
 
             // 5. No pins match
             return false;
+            
         }
 
     } // ApproovHttpClient
