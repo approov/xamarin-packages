@@ -53,18 +53,22 @@ namespace Approov
         {
             lock (InitializerLock)
             {
-                // 1. Initialize Approov SDK
-                if (!ApproovSDKInitialized)
+                // Check if attempting to use a different config
+                if (ApproovSDKInitialized)
                 {
+                    // Initialize Approov SDK
                     if (config == null)
                     {
-                        throw new ApproovSDKException(TAG + "Error loading initial configuration string.");
+                        throw new ConfigurationFailureException(TAG + "Error loading initial configuration string.");
                     }
                     // Check if attempting to use a different config string
                     if ((configUsed != null) && (configUsed != config))
                     {
                         throw new ConfigurationFailureException(TAG + "Error: SDK already initialized");
                     }
+                }
+                else
+                {
                     // Init the SDK
                     try
                     {
@@ -88,7 +92,7 @@ namespace Approov
         *  or is awaiting user input. Since the initial token fetch is the most
         *  expensive the prefetch seems reasonable.
         */
-        public void PrefetchApproovToken()
+        public void Prefetch()
         {
             lock (InitializerLock)
             {
@@ -124,8 +128,12 @@ namespace Approov
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(url))
             {
-                Console.WriteLine(TAG + "FetchApproovToken excluded url " + url);
+                Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
                 return returnMessage;
+            }
+            // If not initialized, just return
+            lock (InitializerLock) {
+                if (!ApproovSDKInitialized) return returnMessage;
             }
             // The Request Headers to check/modify. We make a copy of default headers AND message headers (if not null)
             HttpRequestHeaders headersToCheck = null;
@@ -140,10 +148,6 @@ namespace Approov
                 {
                     headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
                 }
-            }
-            else
-            {
-
             }
             // Check if Bind Header is set to a non empty String
             lock (BindingHeaderLock)
@@ -168,7 +172,7 @@ namespace Approov
                             throw new ConfigurationFailureException(TAG + "Only one value can be used as binding header, detected " + i);
                         }
                         SetDataHashInToken(headerValue);
-                        // TODO: should we log?
+                        // Log
                         Console.WriteLine(TAG + "bindheader set: " + headerValue);
                     }
                     else
@@ -232,6 +236,27 @@ namespace Approov
             if ((approovResult.Status != TokenFetchStatus.Success) &&
                 (approovResult.Status != TokenFetchStatus.UnprotectedUrl))
             {
+                // We need to set any modified headers and return
+                // We now need to copy back the modified headers to either the message or the DefaultMessageHeaders
+                if (message != null)
+                {
+                    foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                    {
+                        // Remove the original header and replace
+                        if (message.Headers.Contains(entry.Key)) message.Headers.Remove(entry.Key);
+                        message.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
+                    }
+                }
+                else
+                {
+                    // We need to replace the DefaultHmessageHeaders since the user has not provided a message
+                    foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                    {
+                        // Remove the original header and replace
+                        if (DefaultRequestHeaders.Contains(entry.Key)) DefaultRequestHeaders.Remove(entry.Key);
+                        DefaultRequestHeaders.TryAddWithoutValidation(entry.Key, entry.Value);
+                    }
+                }
                 return returnMessage;
             }
 
@@ -255,14 +280,10 @@ namespace Approov
                     value = values.First();
                 }
                 // The request headers do NOT contain the header needing replaced
-                // NOTE: we must check the default request headers also, since the might contain the header
-                if (value == null)
-                {
-                    if (value == null) continue;    // None of the available headers contain the value
-                }  // TODO: should we throw ConfigurationFailure since headers to replace are missing?
+                if (value == null) continue;    // None of the available headers contain the value
                 // Check if the request contains the header we want to replace
                 if (value.StartsWith(prefix) && (value.Length > prefix.Length))
-                {   // TODO: why second check?
+                {   
                     string stringValue = value.Substring(prefix.Length);
                     var approovResults = FetchSecureStringAndWait(stringValue, null);
                     Console.WriteLine(TAG + "Substituting header: " + header + ", " + approovResults.Status.ToString());
@@ -285,7 +306,7 @@ namespace Approov
                         else
                         {
                             // Secure string is null
-                            throw new ApproovSDKException(TAG + " null return from secure message fetch");
+                            throw new ApproovSDKException(TAG + "UpdateRequestHeadersWithApproov null return from secure message fetch");
                         }
                     }
                     else if (approovResults.Status == TokenFetchStatus.Rejected)
@@ -354,7 +375,7 @@ namespace Approov
                         // if the request is rejected then we provide a special exception with additional information
                         string localARC = approovResults.ARC;
                         string localReasons = approovResults.RejectionReasons;
-                        throw new RejectionException(TAG + "secure message rejected", arc: localARC, rejectionReasons: localReasons);
+                        throw new RejectionException(TAG + "UpdateRequestHeadersWithApproov secure message rejected", arc: localARC, rejectionReasons: localReasons);
                     }
                     else if (approovResults.Status == TokenFetchStatus.NoNetwork ||
                             approovResults.Status == TokenFetchStatus.PoorNetwork ||
@@ -368,7 +389,7 @@ namespace Approov
                         if (!ProceedOnNetworkFail)
                         {
                             // We throw
-                            throw new NetworkingErrorException(TAG + "Header substitution: network issue, retry needed");
+                            throw new NetworkingErrorException(TAG + "Query parameter substitution: network issue, retry needed");
                         }
                     }
                     else if (approovResults.Status != TokenFetchStatus.UnknownKey)
