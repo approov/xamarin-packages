@@ -28,6 +28,7 @@ using ApproovSDK.iOS.Bind;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Net.Http.Headers;
 
 namespace Approov
 {
@@ -89,6 +90,7 @@ namespace Approov
                     if (ApproovSDKInitialized)
                     {
                         Console.WriteLine(TAG + "SDK initialized");
+                        configUsed = config;
                     }
                     else
                     {
@@ -131,8 +133,6 @@ namespace Approov
         {
             // The return value
             HttpRequestMessage returnMessage;
-            // Are we using the DefaultRequestHeaders?
-            bool usingDefaultRequestHeaders = false;
             // Copy the message
             if (message != null) returnMessage = message;
             else
@@ -140,16 +140,28 @@ namespace Approov
                 // If message is null, we ignore the headers since we are meant to use the DefaultRequestHeaders
                 returnMessage = new HttpRequestMessage();
                 returnMessage.RequestUri = new Uri(url);
-                //returnMessage.Headers = null;  //<= This is impossible to do
-                usingDefaultRequestHeaders = true;
             }
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(url)) {
                 Console.WriteLine(TAG + "FetchApproovToken excluded url " + url);
                 return returnMessage;
             }
-            // The Request Headers to check/modify. Note we can point this to the DefaultRequestHeaders or message.Headers later
-            var headersToCheck = message == null ? DefaultRequestHeaders : returnMessage.Headers;
+            // The Request Headers to check/modify. We make a copy of default headers AND message headers (if not null)
+            HttpRequestHeaders headersToCheck = null;
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in DefaultRequestHeaders){
+                headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
+            }
+            // Do we also need to check the message headers?
+            if (message != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in message.Headers)
+                {
+                    headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
+            else {
+
+            }
             // Check if Bind Header is set to a non empty String
             lock (BindingHeaderLock)
             {
@@ -159,27 +171,6 @@ namespace Approov
                     {
                         // Returns all header values for a specified header stored in the HttpHeaders collection.
                         var headerValues = headersToCheck.GetValues(BindingHeader);
-                        var enumerator = headerValues.GetEnumerator();
-                        int i = 0;
-                        string headerValue = null;
-                        while (enumerator.MoveNext())
-                        {
-                            i++;
-                            headerValue = enumerator.Current;
-                        }
-                        // Check that we have only one value
-                        if (i != 1)
-                        {
-                            throw new ConfigurationFailureException(TAG + "Only one value can be used as binding header, detected " + i);
-                        }
-                        SetDataHashInToken(headerValue);
-                        // TODO: should we log?
-                        Console.WriteLine(TAG + "bindheader set: " + headerValue);
-                    } else if (!usingDefaultRequestHeaders)
-                    {
-                        // We are iterating over the message headers and found no match; we must check the DefaultRequestHeaders
-                        // Returns all header values for a specified header stored in the HttpHeaders collection.
-                        var headerValues = DefaultRequestHeaders.GetValues(BindingHeader);
                         var enumerator = headerValues.GetEnumerator();
                         int i = 0;
                         string headerValue = null;
@@ -282,14 +273,6 @@ namespace Approov
                 // The request headers do NOT contain the header needing replaced
                 // NOTE: we must check the default request headers also, since the might contain the header
                 if (value == null) {
-                    // Try to find the header in the DafultRequestHeaders (if not searched)
-                    if (usingDefaultRequestHeaders) continue; // Try to get next key:value pair
-                    // point the headers to check to the DefaultRequestHeaders and search again
-                    headersToCheck = DefaultRequestHeaders;
-                    if (headersToCheck.TryGetValues(header, out IEnumerable<string> alsoValues))
-                    {
-                        value = alsoValues.First();
-                    }
                     if (value == null) continue;    // None of the available headers contain the value
                 }  // TODO: should we throw ConfigurationFailure since headers to replace are missing?
                 // Check if the request contains the header we want to replace
@@ -340,7 +323,7 @@ namespace Approov
                             throw new NetworkingErrorException(TAG + "Header substitution: network issue, retry needed");
                         }
                     }
-                    else if (approovResults.Status() == ApproovTokenFetchStatus.UnknownKey) {
+                    else if (approovResults.Status() != ApproovTokenFetchStatus.UnknownKey) {
                         // we have failed to get a secure string with a more serious permanent error
                         throw new PermanentException(TAG + "Header substitution: " +
                             StringFromApproovTokenFetchStatus(approovResults.Status()));
@@ -348,8 +331,6 @@ namespace Approov
                 } // if (value.StartsWith ...
             }
             //end
-            // Reset the headersToCheck
-            headersToCheck = message == null ? DefaultRequestHeaders : returnMessage.Headers;
             /* Finally, we deal with any query parameter substitutions, which may require further fetches but these
              * should be using cached results */
             // Make a copy of original substitutionQuery set
@@ -358,8 +339,8 @@ namespace Approov
             {
                 originalQueryParams = new HashSet<string>(SubstitutionQueryParams);
             }
+            string urlString = url;
             foreach (string entry in originalQueryParams) {
-                string urlString = url;
                 // TODO: this throws so document exception?
                 string pattern = entry;
                 Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
@@ -400,7 +381,7 @@ namespace Approov
                             throw new NetworkingErrorException(TAG + "Header substitution: network issue, retry needed");
                         }
                     }
-                    else if (approovResults.Status() == ApproovTokenFetchStatus.UnknownKey)
+                    else if (approovResults.Status() != ApproovTokenFetchStatus.UnknownKey)
                     {
                         // we have failed to get a secure string with a more serious permanent error
                         throw new PermanentException(TAG + "Query parameter substitution error: " +
@@ -408,6 +389,25 @@ namespace Approov
                     }
                 }
             }// foreach
+            // We now need to copy back the modified headers to either the message or the DefaultMessageHeaders
+            if (message != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                {
+                    // Remove the original header and replace
+                    if (message.Headers.Contains(entry.Key)) message.Headers.Remove(entry.Key);
+                    message.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
+            else {
+                // We need to replace the DefaultHmessageHeaders since the user has not provided a message
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                {
+                    // Remove the original header and replace
+                    if (DefaultRequestHeaders.Contains(entry.Key)) DefaultRequestHeaders.Remove(entry.Key);
+                    DefaultRequestHeaders.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
             // We return the new message
             return returnMessage;
         }// UpdateRequestWithApproov
@@ -439,7 +439,7 @@ namespace Approov
             if (approovResults.Status() == ApproovTokenFetchStatus.Disabled) {
                 throw new ConfigurationFailureException(TAG + "FetchSecureString:  secure message string feature is disabled");
             } else if (approovResults.Status() == ApproovTokenFetchStatus.BadKey) {
-                throw new ConfigurationFailureException(TAG + "FetchSecureString: secure string unknown key");
+                throw new ConfigurationFailureException(TAG + "FetchSecureString: secure string bad key");
             }
             else if (approovResults.Status() == ApproovTokenFetchStatus.Rejected)
             {
@@ -454,14 +454,12 @@ namespace Approov
             {
                 /* We are unable to get the secure string due to network conditions so the request can
                 *  be retried by the user later
-                *  We are unable to get the secure string due to network conditions, so - unless this is
-                *  overridden - we must not proceed. The request can be retried by the user later.
+                *  We are unable to get the secure string due to network conditions, so we must not proceed. The request can be retried by the user later.
                 */
-                if (!ProceedOnNetworkFail)
-                {
-                    // We throw
-                    throw new NetworkingErrorException(TAG + "FetchSecureString: network issue, retry needed");
-                }
+                
+                // We throw
+                throw new NetworkingErrorException(TAG + "FetchSecureString: network issue, retry needed");
+                
             }
             else if ((approovResults.Status() != ApproovTokenFetchStatus.Success) &&
                     approovResults.Status() != ApproovTokenFetchStatus.UnknownKey)
@@ -508,14 +506,11 @@ namespace Approov
             {
                 /* We are unable to get the secure string due to network conditions so the request can
                 *  be retried by the user later
-                *  We are unable to get the secure string due to network conditions, so - unless this is
-                *  overridden - we must not proceed. The request can be retried by the user later.
+                *  We are unable to get the secure string due to network conditions, so we must not proceed. The request can be retried by the user later.
                 */
-                if (!ProceedOnNetworkFail)
-                {
-                    // We throw
-                    throw new NetworkingErrorException(TAG + "FetchCustomJWT: network issue, retry needed");
-                }
+                // We throw
+                throw new NetworkingErrorException(TAG + "FetchCustomJWT: network issue, retry needed");
+                
             }
             else if (approovResult.Status() != ApproovTokenFetchStatus.Success) {
                 throw new PermanentException(TAG + "FetchCustomJWT: " + StringFromApproovTokenFetchStatus(approovResult.Status()));
@@ -531,7 +526,7 @@ namespace Approov
          * a rejection .......
          */
         public static void Precheck() {
-            var approovResult = FetchSecureStringAndWait("precheck-dummy-key", null);
+            ApproovTokenFetchResult approovResult = FetchSecureStringAndWait("precheck-dummy-key", null);
             // Process the result
             if (approovResult.Status() == ApproovTokenFetchStatus.Rejected)
             {
@@ -559,7 +554,7 @@ namespace Approov
          * @return String of the device ID or null in case of an error
          */
         public static string GetDeviceID() {
-            string deviceID = GetDeviceID();
+            string deviceID = DeviceID();
             Console.WriteLine(TAG + "DeviceID: " + deviceID);
             return deviceID;
         }
@@ -575,7 +570,7 @@ namespace Approov
          */
         public static void SetDataHashInToken(string data) {
             Console.WriteLine(TAG + "SetDataHashInToken");
-            SetDataHashInToken(data);
+            ApproovSDK.iOS.Bind.Approov.SetDataHashInToken(data);
         }
 
 
@@ -592,7 +587,7 @@ namespace Approov
          * @return String of the base64 encoded message signature
          */
         public static string GetMessageSignature(string message) {
-            var signature = GetMessageSignature(message);
+            var signature = ApproovSDK.iOS.Bind.Approov.GetMessageSignature(message);
             Console.WriteLine(TAG + "GetMessageSignature");
             return signature;
         }
@@ -630,6 +625,13 @@ namespace Approov
             }
         }
 
+        /*  Get set of pins from Approov SDK in JSON format
+         *
+         *
+         */
+        public static string GetPinsJSON(string pinType = "public-key-sha256") {
+            return ApproovSDK.iOS.Bind.Approov.GetPinsJSON(pinType);
+        }
 
 
         /*  Extract a public key from certificate and append to a header to all key types
@@ -692,7 +694,7 @@ namespace Approov
         /*  TLS handshake inspection callback
          *
          */
-        protected override Boolean ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        protected override bool ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
 
             if (sslPolicyErrors != SslPolicyErrors.None)

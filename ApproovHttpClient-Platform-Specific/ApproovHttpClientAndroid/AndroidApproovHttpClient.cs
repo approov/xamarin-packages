@@ -26,15 +26,20 @@ using Android.Content.Res;
 using System.Collections;
 using static Com.Criticalblue.Approovsdk.Approov;
 using System.Collections.Generic;
-using Com.Criticalblue.Approovutils;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Java.Lang;
 
 namespace Approov
 {
     //[Android.Runtime.Preserve(AllMembers = true)]
     public class AndroidApproovHttpClient : ApproovHttpClient
     {
+        // Config used to initialize the SDK
+        private static string configUsed = null;
         /* Creates new Android Approov HttpClient
          * @param   approov config string
          */
@@ -46,60 +51,35 @@ namespace Approov
          */
         public AndroidApproovHttpClient(HttpMessageHandler handler, string config) : base(handler)
         {
-            lock (approovInitializationLock)
+            lock (InitializerLock)
             {
                 // 1. Initialize Approov SDK
-                if (!isApproovSDKInitialized)
+                if (!ApproovSDKInitialized)
                 {
                     if (config == null)
                     {
                         throw new ApproovSDKException(TAG + "Error loading initial configuration string.");
                     }
-                    string dynamicConfigString = ReadDynamicApproovConfig();
+                    // Check if attempting to use a different config string
+                    if ((configUsed != null) && (configUsed != config))
+                    {
+                        throw new ConfigurationFailureException(TAG + "Error: SDK already initialized");
+                    }
+                    // Init the SDK
                     try
                     {
-                        Initialize(Android.App.Application.Context, config, dynamicConfigString, null);
-                        isApproovSDKInitialized = true;
+                        Initialize(Android.App.Application.Context, config, "auto", null);
+                        ApproovSDKInitialized = true;
                         Console.WriteLine(TAG + "SDK initialized");
-                        // if we didn't have a dynamic configuration (after the first launch on the app) then
-                        // we fetch the latest and write it to local storage now
-                        if (dynamicConfigString == null)
-                        {
-                            StoreApproovDynamicConfig(FetchConfig());
-                        }
+                        configUsed = config;
                     }
-                    catch (Exception e)
+                    catch (Java.Lang.Exception e)
                     {
-                        throw new ApproovSDKException(TAG + "Initialization failed: " + e.Message);
+                        throw new InitializationFailureException(TAG + "Initialization failed: " + e.Message);
                     }
+                    SetUserProperty("approov-service-xamarin");
                 }
             }
-        }
-
-        /**
-        * Reads any previously-saved dynamic configuration for the Approov SDK. May return 'null' if a
-        * dynamic configuration has not yet been saved by calling StoreApproovDynamicConfig().
-        */
-        string ReadDynamicApproovConfig()
-        {
-            ISharedPreferences prefs = Android.App.Application.Context.GetSharedPreferences(ApproovPreferencesKey, 0);
-            Console.WriteLine(TAG + "Dynamic configuration loaded");
-            return prefs.GetString(ApproovDynamicKey, null);
-        }
-
-
-        /**
-         * Stores an application's dynamic configuration string in non-volatile storage.
-         * The default implementation stores the string in shared preferences, and setting
-         * the config string to null is equivalent to removing the config.
-        */
-        void StoreApproovDynamicConfig(string newConfig)
-        {
-            Console.WriteLine(TAG + "Dynamic configuration updated ");
-            ISharedPreferences prefs = Android.App.Application.Context.GetSharedPreferences(ApproovPreferencesKey, 0);
-            ISharedPreferencesEditor editor = prefs.Edit();
-            editor.PutString(ApproovDynamicKey, newConfig);
-            editor.Apply();
         }
 
         /*
@@ -110,9 +90,9 @@ namespace Approov
         */
         public void PrefetchApproovToken()
         {
-            lock (approovInitializationLock)
+            lock (InitializerLock)
             {
-                if (isApproovSDKInitialized)
+                if (ApproovSDKInitialized)
                 {
                     _ = HandleTokenFetchAsync();
                 }
@@ -125,17 +105,51 @@ namespace Approov
         }
 
         /*
-         *  Convenience function fetching the Approov token
-         *
+         *  Convenience function updating a set of request headers with Approov
+         *  If the message paraameter is NOT null, the message headers are modified
+         *  If the message parameter is null, then the default request headers are modified
          */
-        protected override void FetchApproovToken(string url, HttpRequestMessage message = null)
+        protected override HttpRequestMessage UpdateRequestHeadersWithApproov(string url, HttpRequestMessage message = null)
         {
+            // The return value
+            HttpRequestMessage returnMessage;
+            // Copy the message
+            if (message != null) returnMessage = message;
+            else
+            {
+                // If message is null, we ignore the headers since we are meant to use the DefaultRequestHeaders
+                returnMessage = new HttpRequestMessage();
+                returnMessage.RequestUri = new Uri(url);
+            }
+            // Check if the URL matches one of the exclusion regexs and just return if it does
+            if (CheckURLIsExcluded(url))
+            {
+                Console.WriteLine(TAG + "FetchApproovToken excluded url " + url);
+                return returnMessage;
+            }
+            // The Request Headers to check/modify. We make a copy of default headers AND message headers (if not null)
+            HttpRequestHeaders headersToCheck = null;
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in DefaultRequestHeaders)
+            {
+                headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
+            }
+            // Do we also need to check the message headers?
+            if (message != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in message.Headers)
+                {
+                    headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
+            else
+            {
+
+            }
             // Check if Bind Header is set to a non empty String
-            lock (bindingHeaderLock)
+            lock (BindingHeaderLock)
             {
                 if (BindingHeader != null)
                 {
-                    var headersToCheck = message == null ? DefaultRequestHeaders : message.Headers;
                     if (headersToCheck.Contains(BindingHeader))
                     {
                         // Returns all header values for a specified header stored in the HttpHeaders collection.
@@ -151,13 +165,15 @@ namespace Approov
                         // Check that we have only one value
                         if (i != 1)
                         {
-                            throw new ApproovSDKException(TAG + "Only one value can be used as binding header, detected " + i);
+                            throw new ConfigurationFailureException(TAG + "Only one value can be used as binding header, detected " + i);
                         }
                         SetDataHashInToken(headerValue);
+                        // TODO: should we log?
+                        Console.WriteLine(TAG + "bindheader set: " + headerValue);
                     }
                     else
                     {
-                        throw new ApproovSDKException(TAG + "Missing token binding header: " + BindingHeader);
+                        throw new ConfigurationFailureException(TAG + "Missing token binding header: " + BindingHeader);
                     }
                 }
             }// lock
@@ -165,62 +181,468 @@ namespace Approov
             // Invoke fetch token sync
             var approovResult = FetchApproovTokenAndWait(url);
 
-            // Hold the fetch status in a variable
-            var aFetchStatus = approovResult.Status;
-
             // Log result
-            Console.WriteLine(TAG + "Approov token for host " + url + " : " + approovResult.LoggableToken);
-
-            // Update dynamic config
-            if (approovResult.IsConfigChanged)
-            {
-                StoreApproovDynamicConfig(FetchConfig());
-            }
+            Console.WriteLine(TAG + "Approov token for " + url + " : " + approovResult.LoggableToken);
 
             // Check the status of the Approov token fetch
-            if (aFetchStatus == TokenFetchStatus.Success)
+            if (approovResult.Status == TokenFetchStatus.Success)
             {
                 // we successfully obtained a token so add it to the header for the HttpClient or HttpRequestMessage
-                if (message == null)
+                // Check if the request headers already contains an ApproovTokenHeader (from previous request, etc)
+                if (headersToCheck.Contains(ApproovTokenHeader))
                 {
-                    if (DefaultRequestHeaders.Contains(ApproovTokenHeader))
+                    if (!headersToCheck.Remove(ApproovTokenHeader))
                     {
-                        if (!DefaultRequestHeaders.Remove(ApproovTokenHeader))
-                        {
-                            // We could not remove the original header
-                            throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
-                        }
+                        // We could not remove the original header
+                        throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
                     }
-                    DefaultRequestHeaders.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
                 }
-                else
-                {
-                    if (message.Headers.Contains(ApproovTokenHeader))
-                    {
-                        message.Headers.Remove(ApproovTokenHeader);
-                    }
-                    message.Headers.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
-                }
+                headersToCheck.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
             }
-            else if ((aFetchStatus == TokenFetchStatus.NoNetwork) ||
-                   (aFetchStatus == TokenFetchStatus.PoorNetwork) ||
-                   (aFetchStatus == TokenFetchStatus.MitmDetected))
+            else if ((approovResult.Status == TokenFetchStatus.NoNetwork) ||
+                   (approovResult.Status == TokenFetchStatus.PoorNetwork) ||
+                   (approovResult.Status == TokenFetchStatus.MitmDetected))
             {
-                // Must not proceed with network request and inform user a retry is needed
-                throw new ApproovSDKException(TAG + "Retry attempt needed. " + approovResult.LoggableToken, true);
+                /* We are unable to get the secure string due to network conditions so the request can
+                *  be retried by the user later
+                *  We are unable to get the secure string due to network conditions, so - unless this is
+                *  overridden - we must not proceed. The request can be retried by the user later.
+                */
+                if (!ProceedOnNetworkFail)
+                {
+                    // Must not proceed with network request and inform user a retry is needed
+                    throw new NetworkingErrorException(TAG + "Retry attempt needed. " + approovResult.LoggableToken, true);
+                }
             }
-            else if ((aFetchStatus == TokenFetchStatus.UnknownUrl) ||
-                 (aFetchStatus == TokenFetchStatus.UnprotectedUrl) ||
-                 (aFetchStatus == TokenFetchStatus.NoApproovService))
+            else if ((approovResult.Status == TokenFetchStatus.UnknownUrl) ||
+                 (approovResult.Status == TokenFetchStatus.UnprotectedUrl) ||
+                 (approovResult.Status == TokenFetchStatus.NoApproovService))
             {
                 Console.WriteLine(TAG + "Will continue without Approov-Token");
             }
             else
             {
-                throw new ApproovSDKException("Unknown approov token fetch result " + aFetchStatus);
+                throw new PermanentException("Unknown approov token fetch result " + approovResult.Status);
             }
 
+            /* We only continue additional processing if we had a valid status from Approov, to prevent additional delays
+             * by trying to fetch from Approov again and this also protects against header substitutions in domains not
+             * protected by Approov and therefore are potentially subject to a MitM.
+             */
+            if ((approovResult.Status != TokenFetchStatus.Success) &&
+                (approovResult.Status != TokenFetchStatus.UnprotectedUrl))
+            {
+                return returnMessage;
+            }
+
+            /* We now have to deal with any substitution headers */
+            // Make a copy of original dictionary
+            Dictionary<string, string> originalSubstitutionHeaders;
+            lock (SubstitutionHeadersLock)
+            {
+                originalSubstitutionHeaders = new Dictionary<string, string>(SubstitutionHeaders);
+            }
+            // Iterate over the copied dictionary
+            foreach (KeyValuePair<string, string> entry in originalSubstitutionHeaders)
+            {
+                string header = entry.Key;
+                string prefix = entry.Value; // can be null
+                // Check if prefix for a given header is not null
+                if (prefix == null) prefix = "";
+                string value = null;
+                if (headersToCheck.TryGetValues(header, out IEnumerable<string> values))
+                {
+                    value = values.First();
+                }
+                // The request headers do NOT contain the header needing replaced
+                // NOTE: we must check the default request headers also, since the might contain the header
+                if (value == null)
+                {
+                    if (value == null) continue;    // None of the available headers contain the value
+                }  // TODO: should we throw ConfigurationFailure since headers to replace are missing?
+                // Check if the request contains the header we want to replace
+                if (value.StartsWith(prefix) && (value.Length > prefix.Length))
+                {   // TODO: why second check?
+                    string stringValue = value.Substring(prefix.Length);
+                    var approovResults = FetchSecureStringAndWait(stringValue, null);
+                    Console.WriteLine(TAG + "Substituting header: " + header + ", " + approovResults.Status.ToString());
+                    // Process the result of the token fetch operation
+                    if (approovResults.Status == TokenFetchStatus.Success)
+                    {
+                        // We add the modified header to the request after removing duplicate
+                        if (approovResults.SecureString != null)
+                        {
+                            if (headersToCheck.Contains(header))
+                            {
+                                if (!headersToCheck.Remove(header))
+                                {
+                                    // We could not remove the original header
+                                    throw new ApproovSDKException(TAG + "Failed removing header: " + header);
+                                }
+                            }
+                            headersToCheck.Add(header, prefix + approovResults.SecureString);
+                        }
+                        else
+                        {
+                            // Secure string is null
+                            throw new ApproovSDKException(TAG + " null return from secure message fetch");
+                        }
+                    }
+                    else if (approovResults.Status == TokenFetchStatus.Rejected)
+                    {
+                        // if the request is rejected then we provide a special exception with additional information
+                        string localARC = approovResults.ARC;
+                        string localReasons = approovResults.RejectionReasons;
+                        throw new RejectionException(TAG + "secure message rejected", arc: localARC, rejectionReasons: localReasons);
+                    }
+                    else if (approovResults.Status == TokenFetchStatus.NoNetwork ||
+                            approovResults.Status == TokenFetchStatus.PoorNetwork ||
+                            approovResults.Status == TokenFetchStatus.MitmDetected)
+                    {
+                        /* We are unable to get the secure string due to network conditions so the request can
+                        *  be retried by the user later
+                        *  We are unable to get the secure string due to network conditions, so - unless this is
+                        *  overridden - we must not proceed. The request can be retried by the user later.
+                        */
+                        if (!ProceedOnNetworkFail)
+                        {
+                            // We throw
+                            throw new NetworkingErrorException(TAG + "Header substitution: network issue, retry needed");
+                        }
+                    }
+                    else if (approovResults.Status != TokenFetchStatus.UnknownKey)
+                    {
+                        // we have failed to get a secure string with a more serious permanent error
+                        throw new PermanentException(TAG + "Header substitution: " + approovResults.Status.ToString());
+                    }
+                } // if (value.StartsWith ...
+            }
+            //end
+            /* Finally, we deal with any query parameter substitutions, which may require further fetches but these
+             * should be using cached results */
+            // Make a copy of original substitutionQuery set
+            HashSet<string> originalQueryParams;
+            lock (SubstitutionQueryParamsLock)
+            {
+                originalQueryParams = new HashSet<string>(SubstitutionQueryParams);
+            }
+            string urlString = url;
+            foreach (string entry in originalQueryParams)
+            {
+                string pattern = entry;
+                Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+                // See if there is any match
+                MatchCollection matchedPatterns = regex.Matches(urlString);
+                // We skip Group at index 0 as this is the match (e.g. ?Api-Key=api_key_placeholder) for the whole
+                // regex, but we only want to replace the query parameter value part (e.g. api_key_placeholder)
+                for (int count = 0; count < matchedPatterns.Count; count++)
+                {
+                    // We must have 2 Groups, the first being the full pattern and the second one the query parameter
+                    if (matchedPatterns[count].Groups.Count != 2) continue;
+                    string matchedText = matchedPatterns[count].Groups[1].Value;
+                    var approovResults = FetchSecureStringAndWait(matchedText, null);
+                    if (approovResults.Status == TokenFetchStatus.Success)
+                    {
+                        // Replace the ocureences and modify the URL
+                        string newURL = urlString.Replace(matchedText, approovResults.SecureString);
+                        // TODO: should we log?
+                        Console.WriteLine(TAG + "replacing url with " + newURL);
+                        message.RequestUri = new Uri(newURL);
+                    }
+                    else if (approovResults.Status == TokenFetchStatus.Rejected)
+                    {
+                        // if the request is rejected then we provide a special exception with additional information
+                        string localARC = approovResults.ARC;
+                        string localReasons = approovResults.RejectionReasons;
+                        throw new RejectionException(TAG + "secure message rejected", arc: localARC, rejectionReasons: localReasons);
+                    }
+                    else if (approovResults.Status == TokenFetchStatus.NoNetwork ||
+                            approovResults.Status == TokenFetchStatus.PoorNetwork ||
+                            approovResults.Status == TokenFetchStatus.MitmDetected)
+                    {
+                        /* We are unable to get the secure string due to network conditions so the request can
+                        *  be retried by the user later
+                        *  We are unable to get the secure string due to network conditions, so - unless this is
+                        *  overridden - we must not proceed. The request can be retried by the user later.
+                        */
+                        if (!ProceedOnNetworkFail)
+                        {
+                            // We throw
+                            throw new NetworkingErrorException(TAG + "Header substitution: network issue, retry needed");
+                        }
+                    }
+                    else if (approovResults.Status != TokenFetchStatus.UnknownKey)
+                    {
+                        // we have failed to get a secure string with a more serious permanent error
+                        throw new PermanentException(TAG + "Query parameter substitution error: " + approovResults.Status.ToString());
+                    }
+                }
+            }// foreach
+            // We now need to copy back the modified headers to either the message or the DefaultMessageHeaders
+            if (message != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                {
+                    // Remove the original header and replace
+                    if (message.Headers.Contains(entry.Key)) message.Headers.Remove(entry.Key);
+                    message.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
+            else
+            {
+                // We need to replace the DefaultHmessageHeaders since the user has not provided a message
+                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
+                {
+                    // Remove the original header and replace
+                    if (DefaultRequestHeaders.Contains(entry.Key)) DefaultRequestHeaders.Remove(entry.Key);
+                    DefaultRequestHeaders.TryAddWithoutValidation(entry.Key, entry.Value);
+                }
+            }
+            // We return the new message
+            return returnMessage;
+
+        }//UpdateRequestHeadersWithApproov
+
+        /*
+         * Fetches a secure string with the given key. If newDef is not nil then a secure string for
+         * the particular app instance may be defined. In this case the new value is returned as the
+         * secure string. Use of an empty string for newDef removes the string entry. Note that this
+         * call may require network transaction and thus may block for some time, so should not be called
+         * from the UI thread. If the attestation fails for any reason then an exception is raised. Note
+         * that the returned string should NEVER be cached by your app, you should call this function when
+         * it is needed. If the fetch fails for any reason an exception is thrown with description. Exceptions
+         * could be due to the feature not being enabled from the CLI tools ...
+         *
+         * @param key is the secure string key to be looked up
+         * @param newDef is any new definition for the secure string, or nil for lookup only
+         * @return secure string (should not be cached by your app) or nil if it was not defined or an error ocurred
+         * @throws exception with description of cause
+         */
+        public static string FetchSecureString(string key, string newDef)
+        {
+            string type = "lookup";
+            if (newDef != null)
+            {
+                type = "definition";
+            }
+            // Invoke fetchSecureString
+            var approovResults = FetchSecureStringAndWait(key, newDef);
+            Console.WriteLine(TAG + "FetchSecureString: " + type + " " + approovResults.Status.ToString());
+            if (approovResults.Status == TokenFetchStatus.Disabled)
+            {
+                throw new ConfigurationFailureException(TAG + "FetchSecureString:  secure message string feature is disabled");
+            }
+            else if (approovResults.Status == TokenFetchStatus.UnknownKey)
+            {
+                throw new ConfigurationFailureException(TAG + "FetchSecureString: secure string unknown key");
+            }
+            else if (approovResults.Status == TokenFetchStatus.Rejected)
+            {
+                // if the request is rejected then we provide a special exception with additional information
+                string localARC = approovResults.ARC;
+                string localReasons = approovResults.RejectionReasons;
+                throw new RejectionException(TAG + "FetchSecureString: secure message rejected", arc: localARC, rejectionReasons: localReasons);
+            }
+            else if (approovResults.Status == TokenFetchStatus.NoNetwork ||
+                    approovResults.Status == TokenFetchStatus.PoorNetwork ||
+                    approovResults.Status == TokenFetchStatus.MitmDetected)
+            {
+                /* We are unable to get the secure string due to network conditions so the request can
+                *  be retried by the user later
+                *  We are unable to get the secure string due to network conditions, so we must not proceed. The request can be retried by the user later.
+                */
+
+                // We throw
+                throw new NetworkingErrorException(TAG + "FetchSecureString: network issue, retry needed");
+
+            }
+            else if ((approovResults.Status != TokenFetchStatus.Success) &&
+                    approovResults.Status != TokenFetchStatus.UnknownKey)
+            {
+                // we have failed to get a secure string with a more serious permanent error
+                throw new PermanentException(TAG + "FetchSecureString: " + approovResults.Status.ToString());
+            }
+            return approovResults.SecureString;
         }
+
+        /*
+         * Fetches a custom JWT with the given payload. Note that this call will require network
+         * transaction and thus will block for some time, so should not be called from the UI thread.
+         * If the fetch fails for any reason an exception will be thrown. Exceptions could be due to
+         * malformed JSON string provided ...
+         *
+         * @param payload is the marshaled JSON object for the claims to be included
+         * @return custom JWT string or nil if an error occurred
+         * @throws exception with description of cause
+         */
+        public static string FetchCustomJWT(string payload)
+        {
+            TokenFetchResult approovResult;
+            try
+            {
+                approovResult = FetchCustomJWTAndWait(payload);
+                Console.WriteLine(TAG + "FetchCustomJWT: " + approovResult.Status.ToString());
+                // process the returned Approov status
+            } catch (IllegalArgumentException e)
+            {
+                throw new PermanentException(TAG + "FetchCustomJWT: malformed JSON " + e.Message);
+            }
+
+            if (approovResult.Status == TokenFetchStatus.Disabled)
+            {
+                throw new ConfigurationFailureException(TAG + "FetchCustomJWT: feature not enabled");
+            }
+            else if (approovResult.Status == TokenFetchStatus.Rejected)
+            {
+                string localARC = approovResult.ARC;
+                string localReasons = approovResult.RejectionReasons;
+                // if the request is rejected then we provide a special exception with additional information
+                throw new RejectionException(TAG + "FetchCustomJWT: rejected", arc: localARC, rejectionReasons: localReasons);
+            }
+            else if (approovResult.Status == TokenFetchStatus.NoNetwork ||
+                  approovResult.Status == TokenFetchStatus.PoorNetwork ||
+                  approovResult.Status == TokenFetchStatus.MitmDetected)
+            {
+                /* We are unable to get the secure string due to network conditions so the request can
+                *  be retried by the user later
+                *  We are unable to get the secure string due to network conditions, so we must not proceed. The request can be retried by the user later.
+                */
+                // We throw
+                throw new NetworkingErrorException(TAG + "FetchCustomJWT: network issue, retry needed");
+
+            }
+            else if (approovResult.Status != TokenFetchStatus.Success)
+            {
+                throw new PermanentException(TAG + "FetchCustomJWT: " + approovResult.Status.ToString());
+            }
+            return approovResult.Token;
+        }
+
+        /*
+         * Performs a precheck to determine if the app will pass attestation. This requires secure
+         * strings to be enabled for the account, although no strings need to be set up. This will
+         * likely require network access so may take some time to complete. It may throw an exception
+         * if the precheck fails or if there is some other problem. Exceptions could be due to
+         * a rejection .......
+         */
+        public static void Precheck()
+        {
+            TokenFetchResult approovResult = FetchSecureStringAndWait("precheck-dummy-key", null);
+            // Process the result
+            if (approovResult.Status == TokenFetchStatus.Rejected)
+            {
+                string localARC = approovResult.ARC;
+                string localReasons = approovResult.RejectionReasons;
+                throw new RejectionException(TAG + "Precheck: rejected ", arc: localARC, rejectionReasons: localReasons);
+            }
+            else if (approovResult.Status == TokenFetchStatus.NoNetwork ||
+                approovResult.Status == TokenFetchStatus.PoorNetwork ||
+                approovResult.Status == TokenFetchStatus.MitmDetected)
+            {
+                throw new NetworkingErrorException(TAG + "Precheck: network issue, retry needed");
+            }
+            else if ((approovResult.Status != TokenFetchStatus.Success) &&
+                  approovResult.Status != TokenFetchStatus.UnknownKey)
+            {
+                throw new PermanentException(TAG + "Precheck: " + approovResult.Status.ToString());
+            }
+        }
+
+        /**
+         * Gets the device ID used by Approov to identify the particular device that the SDK is running on. Note
+         * that different Approov apps on the same device will return a different ID. Moreover, the ID may be
+         * changed by an uninstall and reinstall of the app.
+         *
+         * @return String of the device ID or null in case of an error
+         */
+        public static string GetDeviceID()
+        {
+            string deviceID = DeviceID;
+            Console.WriteLine(TAG + "DeviceID: " + deviceID);
+            return deviceID;
+        }
+
+        /**
+         * Directly sets the data hash to be included in subsequently fetched Approov tokens. If the hash is
+         * different from any previously set value then this will cause the next token fetch operation to
+         * fetch a new token with the correct payload data hash. The hash appears in the
+         * 'pay' claim of the Approov token as a base64 encoded string of the SHA256 hash of the
+         * data. Note that the data is hashed locally and never sent to the Approov cloud service.
+         *
+         * @param data is the data to be hashed and set in the token
+         */
+        public static void SetDataHashInToken(string data)
+        {
+            Console.WriteLine(TAG + "SetDataHashInToken");
+            Com.Criticalblue.Approovsdk.Approov.SetDataHashInToken(data);
+        }
+
+
+        /**
+         * Gets the signature for the given message. This uses an account specific message signing key that is
+         * transmitted to the SDK after a successful fetch if the facility is enabled for the account. Note
+         * that if the attestation failed then the signing key provided is actually random so that the
+         * signature will be incorrect. An Approov token should always be included in the message
+         * being signed and sent alongside this signature to prevent replay attacks. If no signature is
+         * available, because there has been no prior fetch or the feature is not enabled, then an
+         * ApproovException is thrown.
+         *
+         * @param message is the message whose content is to be signed
+         * @return String of the base64 encoded message signature
+         */
+        public static string GetMessageSignature(string message)
+        {
+            var signature = Com.Criticalblue.Approovsdk.Approov.GetMessageSignature(message);
+            Console.WriteLine(TAG + "GetMessageSignature");
+            return signature;
+        }
+
+        /**
+         * Performs an Approov token fetch for the given URL. This should be used in situations where it
+         * is not possible to use the networking interception to add the token. This will
+         * likely require network access so may take some time to complete. If the attestation fails
+         * for any reason then an Exception is thrown. ... Note that
+         * the returned token should NEVER be cached by your app, you should call this function when
+         * it is needed.
+         *
+         * @param url is the URL giving the domain for the token fetch
+         * @return String of the fetched token
+         * @throws Exception if there was a problem
+         */
+
+        public static string FetchToken(string url)
+        {
+            var approovResult = FetchApproovTokenAndWait(url);
+            Console.WriteLine(TAG + "FetchToken: " + url + " " + approovResult.Status.ToString());
+
+            // Process the result
+            if (approovResult.Status == TokenFetchStatus.Success)
+            {
+                return approovResult.Token;
+            }
+            else if (approovResult.Status == TokenFetchStatus.NoNetwork ||
+              approovResult.Status == TokenFetchStatus.PoorNetwork ||
+              approovResult.Status == TokenFetchStatus.MitmDetected)
+            {
+                throw new NetworkingErrorException(TAG + "FetchToken: networking error, retry needed");
+            }
+            else
+            {
+                throw new PermanentException(TAG + "FetchToken: " + approovResult.Status.ToString());
+            }
+        }
+
+        /*  Get set of pins from Approov SDK in JSON format
+         *
+         *
+         */
+        public static string GetPinsJSON(string pinType = "public-key-sha256")
+        {
+            return Com.Criticalblue.Approovsdk.Approov.GetPinsJSON(pinType);
+        }
+
+
+
 
         /* TLS hanshake callback */
 
@@ -259,7 +681,7 @@ namespace Approov
         /*  TLS handshake inspection callback
          *
          */
-        protected override Boolean ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        protected override bool ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
 
             if (sslPolicyErrors != SslPolicyErrors.None)
@@ -268,7 +690,7 @@ namespace Approov
                 throw new ApproovSDKException(TAG + "Empty certificate chain from callback function.");
             JObject allPins;
             // 1. Get Approov pins
-            var aString = ApproovPinsToJson.JsonStringFromApproovSDKPins();
+            var aString = GetPinsJSON();
             // Convert the JSON String to its object representation
             try
             {
