@@ -56,11 +56,6 @@ namespace Approov
                 // Check if attempting to use a different config
                 if (ApproovSDKInitialized)
                 {
-                    // Initialize Approov SDK
-                    if (config == null)
-                    {
-                        throw new ConfigurationFailureException(TAG + "Error loading initial configuration string.");
-                    }
                     // Check if attempting to use a different config string
                     if ((configUsed != null) && (configUsed != config))
                     {
@@ -110,45 +105,31 @@ namespace Approov
 
         /*
          *  Convenience function updating a set of request headers with Approov
-         *  If the message paraameter is NOT null, the message headers are modified
-         *  If the message parameter is null, then the default request headers are modified
+         *  It fetches an Approov Token and modifies the message headers
+         *  
          */
-        protected override HttpRequestMessage UpdateRequestHeadersWithApproov(string url, HttpRequestMessage message = null)
+        protected override HttpRequestMessage UpdateRequestHeadersWithApproov(string url, HttpRequestMessage message)
         {
-            // The return value
-            HttpRequestMessage returnMessage;
-            // Copy the message
-            if (message != null) returnMessage = message;
-            else
-            {
-                // If message is null, we ignore the headers since we are meant to use the DefaultRequestHeaders
-                returnMessage = new HttpRequestMessage();
-                returnMessage.RequestUri = new Uri(url);
+            // Check if we have initialized the SDK
+            lock (InitializerLock) {
+                if (!ApproovSDKInitialized) return message;
             }
+            // The return value
+            HttpRequestMessage returnMessage = message;
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(url))
             {
                 Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
                 return returnMessage;
             }
-            // If not initialized, just return
-            lock (InitializerLock) {
-                if (!ApproovSDKInitialized) return returnMessage;
-            }
+            
             // The Request Headers to check/modify. We make a copy of default headers AND message headers (if not null)
             HttpRequestHeaders headersToCheck = null;
-            foreach (KeyValuePair<string, IEnumerable<string>> entry in DefaultRequestHeaders)
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in message.Headers)
             {
                 headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
             }
-            // Do we also need to check the message headers?
-            if (message != null)
-            {
-                foreach (KeyValuePair<string, IEnumerable<string>> entry in message.Headers)
-                {
-                    headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
-                }
-            }
+            
             // Check if Bind Header is set to a non empty String
             lock (BindingHeaderLock)
             {
@@ -207,10 +188,8 @@ namespace Approov
                    (approovResult.Status == TokenFetchStatus.PoorNetwork) ||
                    (approovResult.Status == TokenFetchStatus.MitmDetected))
             {
-                /* We are unable to get the secure string due to network conditions so the request can
+                /* We are unable to get the approov token due to network conditions so the request can
                 *  be retried by the user later
-                *  We are unable to get the secure string due to network conditions, so - unless this is
-                *  overridden - we must not proceed. The request can be retried by the user later.
                 */
                 if (!ProceedOnNetworkFail)
                 {
@@ -236,27 +215,7 @@ namespace Approov
             if ((approovResult.Status != TokenFetchStatus.Success) &&
                 (approovResult.Status != TokenFetchStatus.UnprotectedUrl))
             {
-                // We need to set any modified headers and return
-                // We now need to copy back the modified headers to either the message or the DefaultMessageHeaders
-                if (message != null)
-                {
-                    foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
-                    {
-                        // Remove the original header and replace
-                        if (message.Headers.Contains(entry.Key)) message.Headers.Remove(entry.Key);
-                        message.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
-                    }
-                }
-                else
-                {
-                    // We need to replace the DefaultHmessageHeaders since the user has not provided a message
-                    foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
-                    {
-                        // Remove the original header and replace
-                        if (DefaultRequestHeaders.Contains(entry.Key)) DefaultRequestHeaders.Remove(entry.Key);
-                        DefaultRequestHeaders.TryAddWithoutValidation(entry.Key, entry.Value);
-                    }
-                }
+                // We return the unmodified message
                 return returnMessage;
             }
 
@@ -366,9 +325,9 @@ namespace Approov
                     {
                         // Replace the ocureences and modify the URL
                         string newURL = urlString.Replace(matchedText, approovResults.SecureString);
-                        // TODO: should we log?
+                        // we log
                         Console.WriteLine(TAG + "replacing url with " + newURL);
-                        message.RequestUri = new Uri(newURL);
+                        returnMessage.RequestUri = new Uri(newURL);
                     }
                     else if (approovResults.Status == TokenFetchStatus.Rejected)
                     {
@@ -399,25 +358,12 @@ namespace Approov
                     }
                 }
             }// foreach
-            // We now need to copy back the modified headers to either the message or the DefaultMessageHeaders
-            if (message != null)
+            // We now need to copy back the modified headers to the return message
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
             {
-                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
-                {
-                    // Remove the original header and replace
-                    if (message.Headers.Contains(entry.Key)) message.Headers.Remove(entry.Key);
-                    message.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
-                }
-            }
-            else
-            {
-                // We need to replace the DefaultHmessageHeaders since the user has not provided a message
-                foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
-                {
-                    // Remove the original header and replace
-                    if (DefaultRequestHeaders.Contains(entry.Key)) DefaultRequestHeaders.Remove(entry.Key);
-                    DefaultRequestHeaders.TryAddWithoutValidation(entry.Key, entry.Value);
-                }
+                // Remove the original header and replace
+                if (returnMessage.Headers.Contains(entry.Key)) returnMessage.Headers.Remove(entry.Key);
+                returnMessage.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
             }
             // We return the new message
             return returnMessage;
@@ -567,6 +513,7 @@ namespace Approov
             {
                 throw new PermanentException(TAG + "Precheck: " + approovResult.Status.ToString());
             }
+            Console.WriteLine(TAG + "Precheck " + approovResult.LoggableToken);
         }
 
         /**
