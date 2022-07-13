@@ -129,7 +129,7 @@ namespace Approov
          *  It fetches an Approov Token and modifies the message headers
          *  
          */
-        protected override HttpRequestMessage UpdateRequestHeadersWithApproov(string url, HttpRequestMessage message)
+        protected override HttpRequestMessage UpdateRequestHeadersWithApproov(HttpRequestMessage message)
         {
             // If not initialized, just return
             lock (InitializerLock)
@@ -138,6 +138,8 @@ namespace Approov
             }
             // The return value
             HttpRequestMessage returnMessage = message;
+            // The url to protect
+            string url = message.RequestUri.AbsoluteUri;
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(url)) {
                 Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);

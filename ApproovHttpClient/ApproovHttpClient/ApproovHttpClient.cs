@@ -28,7 +28,7 @@ namespace Approov
     public class ApproovHttpClient : HttpClient
     {
         /* Approov SDK TAG used for logging and error messages */
-        public static readonly string TAG = "ApproovSDK: ";
+        public static readonly string TAG = "ApproovService: ";
         /* Approov token default header */
         public static string ApproovTokenHeader = "Approov-Token";
         /* Approov token custom prefix: any prefix to be added such as "Bearer " */
@@ -117,8 +117,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -136,8 +142,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -154,8 +166,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri, completionOption, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -172,8 +190,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri, completionOption, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -190,8 +214,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri, completionOption));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
                 }
                 catch (Exception e)
                 {
@@ -208,8 +238,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri, completionOption));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
+
                 }
                 catch (Exception e)
                 {
@@ -226,8 +263,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -245,8 +288,16 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetByteArrayAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
+                    // TODO: verify this
+                    tcs.SetResult(System.Text.Encoding.UTF8.GetBytes(resp.Content.ToString()));
                 }
                 catch (Exception e)
                 {
@@ -263,8 +314,16 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetByteArrayAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
+                    // TODO: verify this
+                    tcs.SetResult(System.Text.Encoding.UTF8.GetBytes(resp.Content.ToString()));
                 }
                 catch (Exception e)
                 {
@@ -282,8 +341,16 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetStreamAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
+                    // TODO: verify this
+                    tcs.SetResult(resp);
                 }
                 catch (Exception e)
                 {
@@ -301,8 +368,16 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetStreamAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
+                    // TODO: verify this
+                    tcs.SetResult(resp);
                 }
                 catch (Exception e)
                 {
@@ -320,8 +395,18 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.GetStringAsync(modifiedMessage.RequestUri));
+                    //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
+                    //tcs.SetResult(await base.GetStringAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
+                    // TODO: verify this
+                    tcs.SetResult(resp.Content.ToString());
                 }
                 catch (Exception e)
                 {
@@ -338,8 +423,16 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri : requestUri.ToString());
-                    tcs.SetResult(await base.GetStringAsync(modifiedMessage.RequestUri));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
+                    // TODO: verify this
+                    tcs.SetResult(resp.Content.ToString());
                 }
                 catch (Exception e)
                 {
@@ -358,8 +451,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.PostAsync(modifiedMessage.RequestUri, content, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -376,8 +476,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.PostAsync(modifiedMessage.RequestUri, content, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -394,8 +501,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.PostAsync(modifiedMessage.RequestUri, content));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -412,8 +526,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.PostAsync(modifiedMessage.RequestUri, content));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -431,8 +552,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage,cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -449,8 +577,17 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content));
+                    //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
+                    //tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -467,8 +604,15 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri.ToString());
-                    tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = requestUri;
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
+                    requestMessage.Content = content;
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -485,8 +629,14 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content, cancellationToken));
+                    // Check if base Uri has been set for the HttpClient
+                    Uri destinationUri;
+                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
+                    else destinationUri = new Uri(requestUri);
+                    // Create message
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+                    tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
                 {
@@ -506,7 +656,7 @@ namespace Approov
                 {
                     // TODO: this seems wrong, since the actual full URI is the one included in the message!?
                     //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + request.RequestUri : request.RequestUri.ToString(), request);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request.RequestUri.ToString(), request);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
                     tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
                 catch (Exception e)
@@ -524,7 +674,7 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + request.RequestUri : request.RequestUri.ToString(), request);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
                     tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption, cancellationToken));
                 }
                 catch (Exception e)
@@ -542,7 +692,7 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + request.RequestUri : request.RequestUri.ToString(), request);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
                     tcs.SetResult(await base.SendAsync(modifiedMessage));
                 }
                 catch (Exception e)
@@ -560,7 +710,7 @@ namespace Approov
             {
                 try
                 {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + request.RequestUri : request.RequestUri.ToString(), request);
+                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
                     tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
                 }
                 catch (Exception e)
@@ -579,13 +729,12 @@ namespace Approov
          *  The function allways returns an `HttpRequestMessage`  with a `URI` parameter potentially modified
          *  subject to string parameter substitution by Approov BUT it might not contain any (null) headers, if 
          *  it is the DefaultHeaders the ones used by the implementation.
-         *  @param  string url to protect by Approov. Note the actual url might be prefixed by a base address
          *  @param  HttpRequestMessage  optional message if used, any request headers and URI replacement will 
          *          modify this message and a new one will be returned
          *  @return HttpRequestMessage  with (possibly) modified URI and (possible) modified request headers or
          *          null headers if parameter `message` was null.
          */
-        protected virtual HttpRequestMessage UpdateRequestHeadersWithApproov(string url, HttpRequestMessage message = null)
+        protected virtual HttpRequestMessage UpdateRequestHeadersWithApproov(HttpRequestMessage message)
         {
             throw new ApproovSDKException(TAG + "UpdateRequestHeadersWithApproov must be overriden in platform specific implementations.");
         }
