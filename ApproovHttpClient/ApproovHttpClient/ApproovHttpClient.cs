@@ -51,14 +51,14 @@ namespace Approov
         protected static readonly string kShaTypeString = "public-key-sha256";
         /* map of headers that should have their values substituted for secure strings, mapped to their
          required prefixes */
-        protected static Dictionary<string,string> SubstitutionHeaders = new Dictionary<string,string>();
+        protected static Dictionary<string, string> SubstitutionHeaders = new Dictionary<string, string>();
         /* Lock object for the above Set*/
         protected static readonly Object SubstitutionHeadersLock = new Object();
         /* set of URL regexs that should be excluded from any Approov protection */
         protected static HashSet<Regex> ExclusionURLRegexs = new HashSet<Regex>();
         /* Lock object for the above Set*/
         protected static readonly Object ExclusionURLRegexsLock = new Object();
-        /*  Set of query parameters that may be substituted, specified by the key name */ 
+        /*  Set of query parameters that may be substituted, specified by the key name */
         protected static HashSet<String> SubstitutionQueryParams = new HashSet<string>();
         /* Lock object for the above Set*/
         protected static readonly Object SubstitutionQueryParamsLock = new Object();
@@ -91,7 +91,7 @@ namespace Approov
                 {
                     // we've found the inner handler test if the callback has been set, then bail out
                     HttpClientHandler httpClientHandler = (HttpClientHandler)chainedHandler;
-                    if ((httpClientHandler.ServerCertificateCustomValidationCallback != null) && (httpClientHandler.ServerCertificateCustomValidationCallback != ServerCallback)) 
+                    if ((httpClientHandler.ServerCertificateCustomValidationCallback != null) && (httpClientHandler.ServerCertificateCustomValidationCallback != ServerCallback))
                     {
                         throw new InitializationFailureException(TAG + "Unable to override InnerHandler custom vallidation callback");
                     }
@@ -297,7 +297,7 @@ namespace Approov
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
                     // TODO: verify this
-                    tcs.SetResult(System.Text.Encoding.UTF8.GetBytes(resp.Content.ToString()));
+                    tcs.SetResult(resp.Content.ReadAsByteArrayAsync().Result);
                 }
                 catch (Exception e)
                 {
@@ -322,8 +322,8 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    // TODO: verify this
-                    tcs.SetResult(System.Text.Encoding.UTF8.GetBytes(resp.Content.ToString()));
+
+                    tcs.SetResult(resp.Content.ReadAsByteArrayAsync().Result);
                 }
                 catch (Exception e)
                 {
@@ -349,7 +349,6 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
-                    // TODO: verify this
                     tcs.SetResult(resp);
                 }
                 catch (Exception e)
@@ -376,7 +375,6 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
-                    // TODO: verify this
                     tcs.SetResult(resp);
                 }
                 catch (Exception e)
@@ -395,8 +393,6 @@ namespace Approov
             {
                 try
                 {
-                    //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    //tcs.SetResult(await base.GetStringAsync(modifiedMessage.RequestUri));
                     // Check if base Uri has been set for the HttpClient
                     Uri destinationUri;
                     if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
@@ -405,8 +401,8 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    // TODO: verify this
-                    tcs.SetResult(resp.Content.ToString());
+                    tcs.SetResult(resp.Content.ReadAsStringAsync().Result);
+                    //resp.Content.ReadAsByteArrayAsync().Result
                 }
                 catch (Exception e)
                 {
@@ -431,7 +427,6 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    // TODO: verify this
                     tcs.SetResult(resp.Content.ToString());
                 }
                 catch (Exception e)
@@ -442,7 +437,7 @@ namespace Approov
             return tcs.Task;
         }
 
-       
+
         /* Post versions */
         public new Task<HttpResponseMessage> PostAsync(Uri requestUri, HttpContent content, CancellationToken cancellationToken)
         {
@@ -560,7 +555,7 @@ namespace Approov
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
                     requestMessage.Content = content;
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage,cancellationToken));
+                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
                 catch (Exception e)
                 {
@@ -577,8 +572,6 @@ namespace Approov
             {
                 try
                 {
-                    //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + requestUri : requestUri);
-                    //tcs.SetResult(await base.PutAsync(modifiedMessage.RequestUri, content));
                     // Check if base Uri has been set for the HttpClient
                     Uri destinationUri;
                     if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
@@ -654,8 +647,6 @@ namespace Approov
             {
                 try
                 {
-                    // TODO: this seems wrong, since the actual full URI is the one included in the message!?
-                    //HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(BaseAddress != null ? BaseAddress.AbsoluteUri + request.RequestUri : request.RequestUri.ToString(), request);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
                     tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
                 }
@@ -742,7 +733,7 @@ namespace Approov
         /* 
          *  Callback function evaluating TLS server trust. We must override this in the platfom independent code
          */
-        protected virtual Boolean ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
+        protected virtual Boolean ServerCallback(HttpRequestMessage sender, X509Certificate2 cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             return false;
         }
@@ -775,8 +766,10 @@ namespace Approov
          *
          * @param proceed is true if Approov networking fails should allow continuation
          */
-        public static void SetProceedOnNetworkFailure(bool proceed) {
-            lock (ProceedOnNetworkFailLock) {
+        public static void SetProceedOnNetworkFailure(bool proceed)
+        {
+            lock (ProceedOnNetworkFailLock)
+            {
                 ProceedOnNetworkFail = proceed;
                 Console.WriteLine(TAG + "SetProceedOnNetworkFailure " + proceed.ToString());
             }
@@ -807,8 +800,10 @@ namespace Approov
          *  @param  header the header to use
          *  @param  prefix optional prefix, can be an empty string if not needed
          */
-        public static void SetTokenHeaderAndPrefix(string header, string prefix) {
-            lock (HeaderAndPrefixLock) {
+        public static void SetTokenHeaderAndPrefix(string header, string prefix)
+        {
+            lock (HeaderAndPrefixLock)
+            {
                 if (header != null) ApproovTokenHeader = header;
                 if (prefix != null) ApproovTokenPrefix = prefix;
                 Console.WriteLine(TAG + "SetTokenHeaderAndPrefix header: " + header + " prefix: " + prefix);
@@ -818,8 +813,10 @@ namespace Approov
         /*  Returns true if the Approov SDk has been succesfully initialized
          *
          */
-        public static bool IsApproovSDKInitialized() {
-            lock (InitializerLock) {
+        public static bool IsApproovSDKInitialized()
+        {
+            lock (InitializerLock)
+            {
                 return ApproovSDKInitialized;
             }
         }
@@ -834,14 +831,18 @@ namespace Approov
          * @param header is the header to be marked for substitution
          * @param requiredPrefix is any required prefix to the value being substituted or nil if not required
          */
-        public static void AddSubstitutionHeader(string header, string requiredPrefix) {
-            if (IsApproovSDKInitialized()) {
-                lock (SubstitutionHeadersLock) {
+        public static void AddSubstitutionHeader(string header, string requiredPrefix)
+        {
+            if (IsApproovSDKInitialized())
+            {
+                lock (SubstitutionHeadersLock)
+                {
                     if (requiredPrefix == null)
                     {
                         SubstitutionHeaders.Add(header, "");
                     }
-                    else {
+                    else
+                    {
                         SubstitutionHeaders.Add(header, requiredPrefix);
                     }
                     Console.WriteLine(TAG + "AddSubstitutionHeader header: " + header + " requiredPrefix: " + requiredPrefix);
@@ -878,9 +879,12 @@ namespace Approov
          *
          * @param key is the query parameter key name to be added for substitution
          */
-        public static void AddSubstitutionQueryParam(string key) {
-            if (IsApproovSDKInitialized()) {
-                lock (SubstitutionQueryParamsLock) {
+        public static void AddSubstitutionQueryParam(string key)
+        {
+            if (IsApproovSDKInitialized())
+            {
+                lock (SubstitutionQueryParamsLock)
+                {
                     SubstitutionQueryParams.Add(key);
                     Console.WriteLine(TAG + "AddSubstitutionQueryParam " + key);
                 }
@@ -922,10 +926,12 @@ namespace Approov
          * @param urlRegex is the regular expression that will be compared against URLs to exclude them
          * @throws ArgumentException if urlRegex is malformed
          */
-        public static void AddExclusionURLRegex(string urlRegex) {
+        public static void AddExclusionURLRegex(string urlRegex)
+        {
             if (IsApproovSDKInitialized())
             {
-                lock (ExclusionURLRegexsLock) {
+                lock (ExclusionURLRegexsLock)
+                {
                     if (urlRegex != null)
                     {
                         Regex reg = new Regex(urlRegex);
@@ -956,7 +962,7 @@ namespace Approov
                             ExclusionURLRegexs.Remove(reg);
                             Console.WriteLine(TAG + "RemoveExclusionURLRegex " + urlRegex);
                         }
-                        
+
                     }
                 }
             }
@@ -968,18 +974,21 @@ namespace Approov
          * @param   url is the URL for which the check is performed
          * @return  Bool true if url matches preset pattern in Dictionary
          */
-        public static bool CheckURLIsExcluded(string url) {
+        public static bool CheckURLIsExcluded(string url)
+        {
             // obtain a copy of the exclusion URL regular expressions in a thread safe way
             int elementCount;
             Regex[] exclusionURLs;
-            lock (ExclusionURLRegexsLock) {
+            lock (ExclusionURLRegexsLock)
+            {
                 elementCount = ExclusionURLRegexs.Count;
                 if (elementCount == 0) return false;
                 exclusionURLs = new Regex[elementCount];
                 ExclusionURLRegexs.CopyTo(exclusionURLs);
             }
 
-            foreach (Regex pattern in exclusionURLs) {
+            foreach (Regex pattern in exclusionURLs)
+            {
                 Match match = pattern.Match(url, 0, url.Length);
                 if (match.Length > 0)
                 {
@@ -1016,7 +1025,8 @@ namespace Approov
             }
         } // ApproovSDKException class
         // initialization failure
-        public class InitializationFailureException : ApproovSDKException {
+        public class InitializationFailureException : ApproovSDKException
+        {
             public InitializationFailureException(string message) : base(message)
             {
                 ShouldRetry = false;
@@ -1029,7 +1039,8 @@ namespace Approov
             }
         }
         // configuration failure
-        public class ConfigurationFailureException : ApproovSDKException {
+        public class ConfigurationFailureException : ApproovSDKException
+        {
             public ConfigurationFailureException(string message) : base(message)
             {
                 ShouldRetry = false;
@@ -1042,7 +1053,8 @@ namespace Approov
             }
         }
         // pinning error
-        public class PinningErrorException : ApproovSDKException {
+        public class PinningErrorException : ApproovSDKException
+        {
             public PinningErrorException(string message) : base(message)
             {
                 ShouldRetry = false;
@@ -1055,7 +1067,8 @@ namespace Approov
             }
         }
         // networking error
-        public class NetworkingErrorException : ApproovSDKException {
+        public class NetworkingErrorException : ApproovSDKException
+        {
             public NetworkingErrorException(string message) : base(message)
             {
                 ShouldRetry = false;
@@ -1068,7 +1081,8 @@ namespace Approov
             }
         }
         // permanent error
-        public class PermanentException : ApproovSDKException {
+        public class PermanentException : ApproovSDKException
+        {
             public PermanentException(string message) : base(message)
             {
                 ShouldRetry = false;
@@ -1081,10 +1095,12 @@ namespace Approov
             }
         }
         // rejection error
-        public class RejectionException : ApproovSDKException {
+        public class RejectionException : ApproovSDKException
+        {
             public string ARC;
             public string Rejectionreasons;
-            public RejectionException(string message, string arc, string rejectionReasons) {
+            public RejectionException(string message, string arc, string rejectionReasons)
+            {
                 ShouldRetry = false;
                 Message = message;
                 ARC = arc;

@@ -145,9 +145,10 @@ namespace Approov
                 Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
                 return returnMessage;
             }
-            
-            // The Request Headers to check/modify. We make a copy of default headers AND message headers (if not null)
-            HttpRequestHeaders headersToCheck = null;
+
+            // The Request Headers to check/modify.
+            using var tempMessage = new HttpRequestMessage();
+            HttpRequestHeaders headersToCheck = tempMessage.Headers;
             foreach (KeyValuePair<string, IEnumerable<string>> entry in message.Headers)
             {
                 headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
