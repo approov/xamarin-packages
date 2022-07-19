@@ -112,225 +112,79 @@ namespace Approov
         /* GeyAsync versions */
         public new Task<HttpResponseMessage> GetAsync(string requestUri)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
+                
         }
 
         public new Task<HttpResponseMessage> GetAsync(string requestUri, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, cancellationToken);
+                
         }
 
         public new Task<HttpResponseMessage> GetAsync(Uri requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, completionOption, cancellationToken);
+                
         }
 
         public new Task<HttpResponseMessage> GetAsync(string requestUri, HttpCompletionOption completionOption, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, completionOption, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> GetAsync(Uri requestUri, HttpCompletionOption completionOption)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, completionOption);
         }
 
         public new Task<HttpResponseMessage> GetAsync(string requestUri, HttpCompletionOption completionOption)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
-
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, completionOption);
         }
 
         public new Task<HttpResponseMessage> GetAsync(Uri requestUri)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         /* GetByteArray versions */
         public new Task<byte[]> GetByteArrayAsync(string requestUri)
         {
-            TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    // TODO: verify this
-                    tcs.SetResult(resp.Content.ReadAsByteArrayAsync().Result);
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage).Result.Content.ReadAsByteArrayAsync();
         }
 
         public new Task<byte[]> GetByteArrayAsync(Uri requestUri)
         {
-            TaskCompletionSource<byte[]> tcs = new TaskCompletionSource<byte[]>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-
-                    tcs.SetResult(resp.Content.ReadAsByteArrayAsync().Result);
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage).Result.Content.ReadAsByteArrayAsync();
+                
         }
 
         /* GetStreamAsync versions */
@@ -341,14 +195,10 @@ namespace Approov
             {
                 try
                 {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
                     // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
+                    var resp = await SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
                     tcs.SetResult(resp);
                 }
                 catch (Exception e)
@@ -357,7 +207,6 @@ namespace Approov
                 }
             });
             return tcs.Task;
-
         }
 
         public new Task<Stream> GetStreamAsync(Uri requestUri)
@@ -367,12 +216,8 @@ namespace Approov
             {
                 try
                 {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
                     // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
                     HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
                     var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
                     tcs.SetResult(resp);
@@ -388,255 +233,93 @@ namespace Approov
         /* GetString versions */
         public new Task<string> GetStringAsync(string requestUri)
         {
-            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    tcs.SetResult(resp.Content.ReadAsStringAsync().Result);
-                    //resp.Content.ReadAsByteArrayAsync().Result
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage).Result.Content.ReadAsStringAsync();
+            
         }
 
         public new Task<string> GetStringAsync(Uri requestUri)
         {
-            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    HttpResponseMessage resp = await base.SendAsync(modifiedMessage);
-                    tcs.SetResult(resp.Content.ToString());
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage).Result.Content.ReadAsStringAsync();
         }
 
 
         /* Post versions */
         public new Task<HttpResponseMessage> PostAsync(Uri requestUri, HttpContent content, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PostAsync(Uri requestUri, HttpContent content)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         public new Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         /* Put versions */
         public new Task<HttpResponseMessage> PutAsync(Uri requestUri, HttpContent content, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PutAsync(string requestUri, HttpContent content)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         public new Task<HttpResponseMessage> PutAsync(Uri requestUri, HttpContent content)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = requestUri;
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
-                    requestMessage.Content = content;
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            requestMessage.Content = content;
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         public new Task<HttpResponseMessage> PutAsync(string requestUri, HttpContent content, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    // Check if base Uri has been set for the HttpClient
-                    Uri destinationUri;
-                    if (BaseAddress != null) destinationUri = new Uri(BaseAddress.AbsoluteUri + requestUri);
-                    else destinationUri = new Uri(requestUri);
-                    // Create message
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, destinationUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            // Create message
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
+            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
+            return SendAsync(modifiedMessage);
         }
 
         /* Send versions */

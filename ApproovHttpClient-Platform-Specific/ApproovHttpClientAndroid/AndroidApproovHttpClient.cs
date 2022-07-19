@@ -118,8 +118,12 @@ namespace Approov
             HttpRequestMessage returnMessage = message;
             // The url to protect
             string url = message.RequestUri.AbsoluteUri;
+            // Optional BaseAddress set in the HttpClient, usually matches url
+            string urlWithBaseAddress = url;
+            // If the base address is included, we compute it so we call fetchToken with the full url
+            if (BaseAddress != null) urlWithBaseAddress = new Uri(BaseAddress + url).AbsoluteUri;
             // Check if the URL matches one of the exclusion regexs and just return if it does
-            if (CheckURLIsExcluded(url))
+            if (CheckURLIsExcluded(urlWithBaseAddress))
             {
                 Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
                 return returnMessage;
@@ -132,7 +136,12 @@ namespace Approov
             {
                 headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
             }
-            
+            // Now also copy the DefaultHeaders since we might want to bind to a value in them
+            foreach (KeyValuePair<string, IEnumerable<string>> entry in DefaultRequestHeaders)
+            {
+                headersToCheck.TryAddWithoutValidation(entry.Key, entry.Value);
+            }
+
             // Check if Bind Header is set to a non empty String
             lock (BindingHeaderLock)
             {
@@ -167,7 +176,7 @@ namespace Approov
             }// lock
 
             // Invoke fetch token sync
-            var approovResult = FetchApproovTokenAndWait(url);
+            var approovResult = FetchApproovTokenAndWait(urlWithBaseAddress);
 
             // Log result
             Console.WriteLine(TAG + "Approov token for " + url + " : " + approovResult.LoggableToken);
@@ -177,15 +186,15 @@ namespace Approov
             {
                 // we successfully obtained a token so add it to the header for the HttpClient or HttpRequestMessage
                 // Check if the request headers already contains an ApproovTokenHeader (from previous request, etc)
-                if (headersToCheck.Contains(ApproovTokenHeader))
+                if (returnMessage.Headers.Contains(ApproovTokenHeader))
                 {
-                    if (!headersToCheck.Remove(ApproovTokenHeader))
+                    if (!returnMessage.Headers.Remove(ApproovTokenHeader))
                     {
                         // We could not remove the original header
                         throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
                     }
                 }
-                headersToCheck.Add(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
+                returnMessage.Headers.TryAddWithoutValidation(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
             }
             else if ((approovResult.Status == TokenFetchStatus.NoNetwork) ||
                    (approovResult.Status == TokenFetchStatus.PoorNetwork) ||
@@ -255,15 +264,15 @@ namespace Approov
                         // We add the modified header to the request after removing duplicate
                         if (approovResults.SecureString != null)
                         {
-                            if (headersToCheck.Contains(header))
+                            if (returnMessage.Headers.Contains(header))
                             {
-                                if (!headersToCheck.Remove(header))
+                                if (!returnMessage.Headers.Remove(header))
                                 {
                                     // We could not remove the original header
                                     throw new ApproovSDKException(TAG + "Failed removing header: " + header);
                                 }
                             }
-                            headersToCheck.Add(header, prefix + approovResults.SecureString);
+                            returnMessage.Headers.TryAddWithoutValidation(header, prefix + approovResults.SecureString);
                         }
                         else
                         {
@@ -361,13 +370,6 @@ namespace Approov
                     }
                 }
             }// foreach
-            // We now need to copy back the modified headers to the return message
-            foreach (KeyValuePair<string, IEnumerable<string>> entry in headersToCheck)
-            {
-                // Remove the original header and replace
-                if (returnMessage.Headers.Contains(entry.Key)) returnMessage.Headers.Remove(entry.Key);
-                returnMessage.Headers.TryAddWithoutValidation(entry.Key, entry.Value);
-            }
             // We return the new message
             return returnMessage;
 
