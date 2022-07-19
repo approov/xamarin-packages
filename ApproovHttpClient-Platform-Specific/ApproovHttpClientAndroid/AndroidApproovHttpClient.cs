@@ -682,27 +682,21 @@ namespace Approov
 
             // 2. Get hostname => sender.RequestUri
             string hostname = sender.RequestUri.Host;
-            if (!allPins.ContainsKey(hostname))
+            JArray allPinsForHost = (JArray)allPins[hostname];
+            // if there are no pins for the domain (but the host is present) then use any managed trust roots instead
+            if ((allPinsForHost != null) && (allPinsForHost.Count == 0)) {
+                allPinsForHost = (JArray)allPins["*"];
+            }
+            // if we are not pinning then we consider this level of trust to be acceptable
+            if ((allPinsForHost == null) || (allPinsForHost.Count == 0))
             {
-                // 4. Host is not being pinned and we have succesfully checked certificate chain
+                // 3. Host is not being pinned and we have succesfully checked certificate chain
+                Console.WriteLine(TAG + "Host not pinned " + hostname);
                 return true;
             }
             
-            // 3. Check if host is being pinned and has no pins set
-            //bool status = allPins.TryGetValue(hostname, out allPinsForHost);
-            bool status = allPins.ContainsKey(hostname);
-            if (!status)
-                {
-                    throw new ApproovSDKException(TAG + "Unable to obtain pin set from SDK for host " + hostname);
-                }
-                JArray allPinsForHost = (JArray)allPins[hostname];
-                if (allPinsForHost.Count == 0)
-                {
-                    // Any pins for host allowed
-                    return true;
-                }
-      
-            // 5. Iterate over certificate chain and attempt to match PK pin to one in Approov SDK
+           
+            // 3. Iterate over certificate chain and attempt to match PK pin to one in Approov SDK
             foreach (X509ChainElement element in chain.ChainElements)
             {
                 var certificate = element.Certificate;
@@ -724,6 +718,7 @@ namespace Approov
                 {
                     if (entry.Equals(publicKeyBase64))
                     {
+                        Console.WriteLine(TAG + hostname + " Matched public key pin " + publicKeyBase64 + " from " + allPinsForHost.Count + " pins");
                         return true;
                     }
                 }

@@ -694,34 +694,30 @@ namespace Approov
 
             // 1. Get Approov pins
             NSDictionary<NSString, NSArray<NSString>> allPins = GetPins(kShaTypeString);
+
             if (allPins == null)
             {
                 throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK");
             }
 
             // 2. Get hostname => sender.RequestUri
-            NSArray<NSString> allPinsForHost;
             NSString hostname = (NSString)sender.RequestUri.Host;
-            if (!allPins.ContainsKey(hostname))
+            NSArray<NSString> allPinsForHost;
+            bool status = allPins.TryGetValue(hostname, out allPinsForHost);
+
+            // if there are no pins for the domain (but the host is present) then use any managed trust roots instead
+            if ((allPinsForHost == null) && (allPinsForHost.Count == 0)) {
+                status = allPins.TryGetValue((NSString)"*", out allPinsForHost);
+            }
+            // if we are not pinning then we consider this level of trust to be acceptable
+            if ((allPinsForHost == null) || (allPinsForHost.Count == 0))
             {
-                // 4. Host is not being pinned and we have succesfully checked certificate
+                // Any pins for host allowed
+                Console.WriteLine(TAG + "Host not pinned " + hostname);
                 return true;
             }
-            else
-            {
-                // 3. Check if host is being pinned and has no pins set
-                bool status = allPins.TryGetValue(hostname, out allPinsForHost);
-                if (!status)
-                {
-                    throw new ApproovSDKException(TAG + "Unable to obtain pin set from SDK for host " + hostname);
-                }
-                if (allPinsForHost.Count == 0)
-                {
-                    // Any pins for host allowed
-                    return true;
-                }
-            }
-            /* 5. Attempt to match PK pin to one in Approov SDK 
+
+            /* 3. Attempt to match PK pin to one in Approov SDK 
              *    We either iterate over the chain of certificates (if we managed to build one)
              *    or over the leaf certificate since Xamarin does not support ECC public keys
              */
@@ -757,7 +753,7 @@ namespace Approov
                 string certHashBase64 = Convert.ToBase64String(certHashBytes);
                 throw new ApproovSDKException(TAG + " Failed to extract Public Key from certificate for host " + hostname + ". Cert hash: " + certHashBase64);
             }
-            // 5.1 Iterate over available keys attempting to match one
+            // 3.1 Iterate over available keys attempting to match one
             foreach (string pkiWithHeader in pkiBytes)
             {
                 // Iterate over the list of pins and test each one
@@ -765,11 +761,12 @@ namespace Approov
                 {
                     if (entry.Equals(pkiWithHeader))
                     {
+                        Console.WriteLine(TAG + hostname + " Matched public key pin " + entry + " from " + allPinsForHost.Count + " pins");
                         return true;
                     }
                 }
             }
-            // 5. No pins match
+            // 4. No pins match
             return false;
         }
 

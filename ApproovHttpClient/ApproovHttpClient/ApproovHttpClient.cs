@@ -114,8 +114,7 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
                 
         }
 
@@ -123,8 +122,7 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, cancellationToken);
+            return SendAsync(requestMessage, cancellationToken);
                 
         }
 
@@ -132,8 +130,7 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, completionOption, cancellationToken);
+            return SendAsync(requestMessage, completionOption, cancellationToken);
                 
         }
 
@@ -141,32 +138,28 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, completionOption, cancellationToken);
+            return SendAsync(requestMessage, completionOption, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> GetAsync(Uri requestUri, HttpCompletionOption completionOption)
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, completionOption);
+            return SendAsync(requestMessage, completionOption);
         }
 
         public new Task<HttpResponseMessage> GetAsync(string requestUri, HttpCompletionOption completionOption)
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, completionOption);
+            return SendAsync(requestMessage, completionOption);
         }
 
         public new Task<HttpResponseMessage> GetAsync(Uri requestUri)
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         /* GetByteArray versions */
@@ -174,16 +167,14 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage).Result.Content.ReadAsByteArrayAsync();
+            return SendAsync(requestMessage).Result.Content.ReadAsByteArrayAsync();
         }
 
         public new Task<byte[]> GetByteArrayAsync(Uri requestUri)
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage).Result.Content.ReadAsByteArrayAsync();
+            return SendAsync(requestMessage).Result.Content.ReadAsByteArrayAsync();
                 
         }
 
@@ -197,8 +188,7 @@ namespace Approov
                 {
                     // Create message
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    var resp = await SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
+                    var resp = await SendAsync(requestMessage).Result.Content.ReadAsStreamAsync();
                     tcs.SetResult(resp);
                 }
                 catch (Exception e)
@@ -218,8 +208,7 @@ namespace Approov
                 {
                     // Create message
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-                    var resp = await base.SendAsync(modifiedMessage).Result.Content.ReadAsStreamAsync();
+                    var resp = await base.SendAsync(requestMessage).Result.Content.ReadAsStreamAsync();
                     tcs.SetResult(resp);
                 }
                 catch (Exception e)
@@ -235,8 +224,7 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage).Result.Content.ReadAsStringAsync();
+            return SendAsync(requestMessage).Result.Content.ReadAsStringAsync();
             
         }
 
@@ -244,8 +232,7 @@ namespace Approov
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage).Result.Content.ReadAsStringAsync();
+            return SendAsync(requestMessage).Result.Content.ReadAsStringAsync();
         }
 
 
@@ -255,8 +242,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, cancellationToken);
+            return SendAsync(requestMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content, CancellationToken cancellationToken)
@@ -264,8 +250,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, cancellationToken);
+            return SendAsync(requestMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PostAsync(Uri requestUri, HttpContent content)
@@ -273,8 +258,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         public new Task<HttpResponseMessage> PostAsync(string requestUri, HttpContent content)
@@ -282,8 +266,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         /* Put versions */
@@ -292,8 +275,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage, cancellationToken);
+            return SendAsync(requestMessage, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> PutAsync(string requestUri, HttpContent content)
@@ -301,8 +283,7 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         public new Task<HttpResponseMessage> PutAsync(Uri requestUri, HttpContent content)
@@ -310,16 +291,14 @@ namespace Approov
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
             requestMessage.Content = content;
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         public new Task<HttpResponseMessage> PutAsync(string requestUri, HttpContent content, CancellationToken cancellationToken)
         {
             // Create message
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, requestUri);
-            HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(requestMessage);
-            return SendAsync(modifiedMessage);
+            return SendAsync(requestMessage);
         }
 
         /* Send versions */
