@@ -340,38 +340,12 @@ namespace Approov
 
         public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            return SendAsync(request, CancellationToken.None);
         }
 
         public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, completionOption));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            return SendAsync(request, completionOption, CancellationToken.None);
         }
 
         /*
