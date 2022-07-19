@@ -304,20 +304,7 @@ namespace Approov
         /* Send versions */
         public override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    HttpRequestMessage modifiedMessage = UpdateRequestHeadersWithApproov(request);
-                    tcs.SetResult(await base.SendAsync(modifiedMessage, cancellationToken));
-                }
-                catch (Exception e)
-                {
-                    tcs.SetException(e);
-                }
-            });
-            return tcs.Task;
+            return SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken);
         }
 
         public new Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)

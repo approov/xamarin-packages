@@ -199,7 +199,7 @@ namespace Approov
             var approovResult = FetchApproovTokenAndWait(urlWithBaseAddress);
 
             // Log result
-            Console.WriteLine(TAG + "Approov token for " + url + " : " + approovResult.LoggableToken());
+            Console.WriteLine(TAG + "Approov token for " + urlWithBaseAddress + " : " + approovResult.LoggableToken());
 
             // Check the status of the Approov token fetch
             if (approovResult.Status() == ApproovTokenFetchStatus.Success)
@@ -707,7 +707,7 @@ namespace Approov
 
             // if there are no pins for the domain (but the host is present) then use any managed trust roots instead
             if ((allPinsForHost == null) && (allPinsForHost.Count == 0)) {
-                status = allPins.TryGetValue((NSString)"*", out allPinsForHost);
+                _ = allPins.TryGetValue((NSString)"*", out allPinsForHost);
             }
             // if we are not pinning then we consider this level of trust to be acceptable
             if ((allPinsForHost == null) || (allPinsForHost.Count == 0))

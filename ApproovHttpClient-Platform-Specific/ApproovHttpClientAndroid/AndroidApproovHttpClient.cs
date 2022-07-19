@@ -179,7 +179,7 @@ namespace Approov
             var approovResult = FetchApproovTokenAndWait(urlWithBaseAddress);
 
             // Log result
-            Console.WriteLine(TAG + "Approov token for " + url + " : " + approovResult.LoggableToken);
+            Console.WriteLine(TAG + "Approov token for " + urlWithBaseAddress + " : " + approovResult.LoggableToken);
 
             // Check the status of the Approov token fetch
             if (approovResult.Status == TokenFetchStatus.Success)
