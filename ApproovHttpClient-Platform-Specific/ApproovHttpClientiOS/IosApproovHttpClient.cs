@@ -708,7 +708,7 @@ namespace Approov
             {
                 allPinsForHost = allApproovPins[hostname];
             }
-            else { // TODO: Is this correct
+            else { 
                 // Host is not protected by Approov; If the cert chain is correct then proceed
                 Console.WriteLine(TAG + hostname + " not protected by Approov");
                 return true;
@@ -718,7 +718,6 @@ namespace Approov
             if ((allPinsForHost == null) && (allPinsForHost.Count == 0)) {
                 if (allApproovPins.ContainsKey("*"))
                     allPinsForHost = allApproovPins["*"];
-                // TODO: Is it possible that "*" is not available at all? Do we throw?
             }
             // if we are not pinning then we consider this level of trust to be acceptable
             if ((allPinsForHost == null) || (allPinsForHost.Count == 0))
