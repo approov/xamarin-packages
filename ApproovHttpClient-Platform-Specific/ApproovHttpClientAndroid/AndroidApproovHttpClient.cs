@@ -723,8 +723,8 @@ namespace Approov
                     }
                 }
             }
-
             // 5. No pins match
+            Console.WriteLine(TAG + hostname + " No matching public key pins from " + allPinsForHost.Count + " pins");
             return false;
             
         }

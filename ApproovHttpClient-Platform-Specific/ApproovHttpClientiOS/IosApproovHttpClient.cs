@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
 
 namespace Approov
 {
@@ -682,7 +683,7 @@ namespace Approov
                  */
                 try
                 {
-                    chain.Build(certificate: cert);
+                    _ = chain.Build(certificate: cert);
                 }
                 catch (Exception e)
                 {
@@ -693,21 +694,31 @@ namespace Approov
 
 
             // 1. Get Approov pins
-            NSDictionary<NSString, NSArray<NSString>> allPins = GetPins(kShaTypeString);
-
-            if (allPins == null)
+            string jsonPins = GetPinsJSON(kShaTypeString);
+            Dictionary<string, List<string>> allApproovPins = (Dictionary<string, List<string>>)JsonConvert.DeserializeObject(jsonPins);
+            if (allApproovPins == null)
             {
-                throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK");
+                throw new PermanentException(TAG + "Unable to obtain pins from SDK");
             }
 
             // 2. Get hostname => sender.RequestUri
-            NSString hostname = (NSString)sender.RequestUri.Host;
-            NSArray<NSString> allPinsForHost;
-            bool status = allPins.TryGetValue(hostname, out allPinsForHost);
+            string hostname = sender.RequestUri.Host;
+            List<string> allPinsForHost;
+            if (allApproovPins.ContainsKey(hostname))
+            {
+                allPinsForHost = allApproovPins[hostname];
+            }
+            else { // TODO: Is this correct
+                // Host is not protected by Approov; If the cert chain is correct then proceed
+                Console.WriteLine(TAG + hostname + " not protected by Approov");
+                return true;
+            }
 
             // if there are no pins for the domain (but the host is present) then use any managed trust roots instead
             if ((allPinsForHost == null) && (allPinsForHost.Count == 0)) {
-                _ = allPins.TryGetValue((NSString)"*", out allPinsForHost);
+                if (allApproovPins.ContainsKey("*"))
+                    allPinsForHost = allApproovPins["*"];
+                // TODO: Is it possible that "*" is not available at all? Do we throw?
             }
             // if we are not pinning then we consider this level of trust to be acceptable
             if ((allPinsForHost == null) || (allPinsForHost.Count == 0))
@@ -767,6 +778,7 @@ namespace Approov
                 }
             }
             // 4. No pins match
+            Console.WriteLine(TAG + hostname + " No matching public key pins from " + allPinsForHost.Count + " pins");
             return false;
         }
 
