@@ -1,0 +1,58 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/ivol/CriticalBlue/Git/private/AppproovHttpClient-Platform-Specific/ApproovHttpClientiOS/ApproovHttpClient.iOS.csproj": {}
+  },
+  "projects": {
+    "/Users/ivol/CriticalBlue/Git/private/AppproovHttpClient-Platform-Specific/ApproovHttpClientiOS/ApproovHttpClient.iOS.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/ivol/CriticalBlue/Git/private/AppproovHttpClient-Platform-Specific/ApproovHttpClientiOS/ApproovHttpClient.iOS.csproj",
+        "projectName": "ApproovHttpClient.iOS",
+        "projectPath": "/Users/ivol/CriticalBlue/Git/private/AppproovHttpClient-Platform-Specific/ApproovHttpClientiOS/ApproovHttpClient.iOS.csproj",
+        "packagesPath": "/Users/ivol/.nuget/packages/",
+        "outputPath": "/Users/ivol/CriticalBlue/Git/private/AppproovHttpClient-Platform-Specific/ApproovHttpClientiOS/obj/",
+        "projectStyle": "PackageReference",
+        "skipContentFileWrite": true,
+        "configFilePaths": [
+          "/Users/ivol/.config/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "xamarinios10"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "xamarinios10": {
+            "projectReferences": {}
+          }
+        }
+      },
+      "frameworks": {
+        "xamarinios10": {
+          "dependencies": {
+            "ApproovSDK": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "NuGet.Build.Packaging": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[0.2.2, )"
+            },
+            "System.Net.Http": {
+              "target": "Package",
+              "version": "[4.3.4, )"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>ApproovAndroidTest</id>
+    <version>1.0.1</version>
+    <title>Approov</title>
+    <authors>ivol</authors>
+    <owners>Criticalblue</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>http://approov.io/</projectUrl>
+    <icon>approov.png</icon>
+    <description>Custom HttpClient implementation using Approov API protection</description>
+    <releaseNotes>Use a Factory design pattern with ApproovHttpClientFactory</releaseNotes>
+    <copyright>Copyright Criticalblue 2020</copyright>
+    <tags>API Protection Attestation Mobile</tags>
+    <dependencies>
+        <group targetFramework="MonoAndroid10">
+            <dependency id="ApproovHttpClient" version="1.0.7" />
+            <dependency id="ApproovSDK" version="2.7.0.0" />
+        </group>
+    </dependencies>
+  </metadata>
+  <!-- Insert below <metadata> element -->
+<files>
+    <!-- Cross-platform reference assemblies -->
+        <file src="approov.png" target="" />
+    <!-- Android reference assemblies -->
+        <file src="bin\Release\ApproovAndroidTest.dll" target="lib/MonoAndroid10/ApproovAndroidTest.dll" />
+</files>
+
+</package>

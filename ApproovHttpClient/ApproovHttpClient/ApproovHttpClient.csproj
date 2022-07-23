@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.5</Version>
+    <Version>1.0.7</Version>
     <Description>Custom HttpClient implementation using Approov API protection</Description>
     <Copyright>Copyright Criticalblue 2020</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -12,15 +12,20 @@
     <PackageReleaseNotes>More  code refactoring.</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <SignAssembly>false</SignAssembly>
-    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="3.1.1" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\..\..\Downloads\approov.png">
+    <None Remove="System.Net.Http" />
+    <None Remove="System.Runtime" />
+    <None Remove="System.IO" />
+    <None Remove="System.Threading" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="approov.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
