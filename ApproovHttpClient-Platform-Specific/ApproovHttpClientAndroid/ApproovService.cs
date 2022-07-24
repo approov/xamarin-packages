@@ -77,15 +77,29 @@ namespace Approov
             }
         }
         /* Creates new Android Approov Service
-         * @param   approov config string
          */
-        public ApproovService() : this(new HttpClientHandler()) { }
+        protected ApproovService() : this(new HttpClientHandler()) { }
 
         /* Creates new Android Approov HttpClient
          * @param   custom message handler
-         * @param   approov config string
          */
-        public ApproovService(HttpMessageHandler handler) : base(handler){ }
+        protected ApproovService(HttpMessageHandler handler) : base(handler){ }
+
+        /* Create an ApproovService instance
+         *
+         */
+        public static ApproovService CreateHttpClient()
+        {
+            return CreateHttpClient(new HttpClientHandler());
+        }
+
+        /* Create an ApproovService instance
+         * @param   custom message handler
+         *
+         */
+        public static ApproovService CreateHttpClient(HttpMessageHandler handler) {
+            return new ApproovService(handler);
+        }
 
         /*
         *  Allows token prefetch operation to be performed as early as possible. This

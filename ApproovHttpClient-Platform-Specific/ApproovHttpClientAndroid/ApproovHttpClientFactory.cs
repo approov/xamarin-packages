@@ -27,7 +27,7 @@ namespace Approov
 
         public ApproovService GetApproovHttpClient(HttpMessageHandler handler)
         {
-            return new ApproovService(handler);
+            return  ApproovService.CreateHttpClient(handler);
         }
     }
 }

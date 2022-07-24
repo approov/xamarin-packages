@@ -96,16 +96,31 @@ namespace Approov
             }
         }
 
-        /*  Default constructor creates a new Handler
-         *
+        /* Creates new iOS Approov Service
          */
-        public ApproovService() : this(new HttpClientHandler()) { }
+        protected ApproovService() : this(new HttpClientHandler()) { }
 
         /* Creates new iOS Approov HttpClient
          * @param   custom message handler
-         * @param   approov config string
          */
-        public ApproovService(HttpMessageHandler handler) : base(handler) { }
+        protected ApproovService(HttpMessageHandler handler) : base(handler) { }
+
+        /* Create an ApproovService instance
+         *
+         */
+        public static ApproovService CreateHttpClient()
+        {
+            return CreateHttpClient(new HttpClientHandler());
+        }
+
+        /* Create an ApproovService instance
+         * @param   custom message handler
+         *
+         */
+        public static ApproovService CreateHttpClient(HttpMessageHandler handler)
+        {
+            return new ApproovService(handler);
+        }
 
 
         /*
@@ -114,7 +129,7 @@ namespace Approov
         *  or is awaiting user input. Since the initial token fetch is the most
         *  expensive the prefetch seems reasonable.
         */
-        public override void Prefetch()
+        public void Prefetch()
         {
             lock (InitializerLock)
             {

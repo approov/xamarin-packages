@@ -22,14 +22,14 @@ namespace Approov
         public ApproovHttpClientFactory()
         {
         }
-        public ApproovService GetApproovHttpClient()
+        public static ApproovService GetApproovHttpClient()
         {
             return GetApproovHttpClient(new HttpClientHandler());
         }
 
-        public ApproovService GetApproovHttpClient(HttpMessageHandler handler)
+        public static ApproovService GetApproovHttpClient(HttpMessageHandler handler)
         {
-            return new ApproovService(handler);
+            return ApproovService.CreateHttpClient(handler);
         }
     }
 }
