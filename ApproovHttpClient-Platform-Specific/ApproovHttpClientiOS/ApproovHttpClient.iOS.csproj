@@ -45,7 +45,6 @@
   <ItemGroup>
     <Compile Include="ApproovService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ApproovHttpClientFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ApproovSDK">

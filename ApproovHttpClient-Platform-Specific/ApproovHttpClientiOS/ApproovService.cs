@@ -715,7 +715,7 @@ namespace Approov
 
             // 1. Get Approov pins
             string jsonPins = GetPinsJSON(kShaTypeString);
-            Dictionary<string, List<string>> allApproovPins = (Dictionary<string, List<string>>)JsonConvert.DeserializeObject(jsonPins);
+            var allApproovPins = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(jsonPins);
             if (allApproovPins == null)
             {
                 throw new PermanentException(TAG + "Unable to obtain pins from SDK");
@@ -798,6 +798,7 @@ namespace Approov
             }
             // 4. No pins match
             Console.WriteLine(TAG + hostname + " No matching public key pins from " + allPinsForHost.Count + " pins");
+            
             return false;
         }
 
