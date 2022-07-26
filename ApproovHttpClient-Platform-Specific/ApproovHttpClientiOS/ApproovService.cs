@@ -105,21 +105,21 @@ namespace Approov
          */
         protected ApproovService(HttpMessageHandler handler) : base(handler) { }
 
-        /* Create an ApproovService instance
+        /* Create an ApproovHttpClient instance
          *
          */
-        public static ApproovService CreateHttpClient()
+        public static ApproovHttpClient CreateHttpClient()
         {
             return CreateHttpClient(new HttpClientHandler());
         }
 
-        /* Create an ApproovService instance
+        /* Create an ApproovHttpClient instance
          * @param   custom message handler
          *
          */
-        public static ApproovService CreateHttpClient(HttpMessageHandler handler)
+        public static ApproovHttpClient CreateHttpClient(HttpMessageHandler handler)
         {
-            return new ApproovService(handler);
+            return new ApproovHttpClient(handler);
         }
 
 
@@ -232,7 +232,7 @@ namespace Approov
                     if (!returnMessage.Headers.Remove(ApproovTokenHeader))
                     {
                         // We could not remove the original header
-                        throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
+                        throw new ApproovException(TAG + "Failed removing header: " + ApproovTokenHeader);
                     }
                 }
                 returnMessage.Headers.TryAddWithoutValidation(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token());
@@ -308,14 +308,14 @@ namespace Approov
                                 if (!returnMessage.Headers.Remove(header))
                                 {
                                     // We could not remove the original header
-                                    throw new ApproovSDKException(TAG + "Failed removing header: " + header);
+                                    throw new ApproovException(TAG + "Failed removing header: " + header);
                                 }
                             }
                             returnMessage.Headers.TryAddWithoutValidation(header, prefix + approovResults.SecureString());
                         }
                         else {
                             // Secure string is null
-                            throw new ApproovSDKException(TAG + "UpdateRequestHeadersWithApproov null return from secure message fetch");
+                            throw new ApproovException(TAG + "UpdateRequestHeadersWithApproov null return from secure message fetch");
                         }
                     }
                     else if (approovResults.Status() == ApproovTokenFetchStatus.Rejected)
@@ -781,7 +781,7 @@ namespace Approov
                 SHA256 certHash = SHA256.Create();
                 byte[] certHashBytes = certHash.ComputeHash(cert.RawData);
                 string certHashBase64 = Convert.ToBase64String(certHashBytes);
-                throw new ApproovSDKException(TAG + " Failed to extract Public Key from certificate for host " + hostname + ". Cert hash: " + certHashBase64);
+                throw new ApproovException(TAG + " Failed to extract Public Key from certificate for host " + hostname + ". Cert hash: " + certHashBase64);
             }
             // 3.1 Iterate over available keys attempting to match one
             foreach (string pkiWithHeader in pkiBytes)

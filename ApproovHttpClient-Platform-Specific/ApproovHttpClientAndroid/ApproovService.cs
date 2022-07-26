@@ -85,20 +85,21 @@ namespace Approov
          */
         protected ApproovService(HttpMessageHandler handler) : base(handler){ }
 
-        /* Create an ApproovService instance
+        /* Create an ApproovHttpClient instance
          *
          */
-        public static ApproovService CreateHttpClient()
+        public static ApproovHttpClient CreateHttpClient()
         {
             return CreateHttpClient(new HttpClientHandler());
         }
 
-        /* Create an ApproovService instance
+        /* Create an ApproovHttpClient instance
          * @param   custom message handler
          *
          */
-        public static ApproovService CreateHttpClient(HttpMessageHandler handler) {
-            return new ApproovService(handler);
+        public static ApproovHttpClient CreateHttpClient(HttpMessageHandler handler)
+        {
+            return new ApproovHttpClient(handler);
         }
 
         /*
@@ -211,7 +212,7 @@ namespace Approov
                     if (!returnMessage.Headers.Remove(ApproovTokenHeader))
                     {
                         // We could not remove the original header
-                        throw new ApproovSDKException(TAG + "Failed removing header: " + ApproovTokenHeader);
+                        throw new ApproovException(TAG + "Failed removing header: " + ApproovTokenHeader);
                     }
                 }
                 returnMessage.Headers.TryAddWithoutValidation(ApproovTokenHeader, ApproovTokenPrefix + approovResult.Token);
@@ -289,7 +290,7 @@ namespace Approov
                                 if (!returnMessage.Headers.Remove(header))
                                 {
                                     // We could not remove the original header
-                                    throw new ApproovSDKException(TAG + "Failed removing header: " + header);
+                                    throw new ApproovException(TAG + "Failed removing header: " + header);
                                 }
                             }
                             returnMessage.Headers.TryAddWithoutValidation(header, prefix + approovResults.SecureString);
@@ -297,7 +298,7 @@ namespace Approov
                         else
                         {
                             // Secure string is null
-                            throw new ApproovSDKException(TAG + "UpdateRequestHeadersWithApproov null return from secure message fetch");
+                            throw new ApproovException(TAG + "UpdateRequestHeadersWithApproov null return from secure message fetch");
                         }
                     }
                     else if (approovResults.Status == TokenFetchStatus.Rejected)
@@ -680,7 +681,7 @@ namespace Approov
             if (sslPolicyErrors != SslPolicyErrors.None)
                 return false;
             if (chain.ChainElements.Count == 0)
-                throw new ApproovSDKException(TAG + "Empty certificate chain from callback function.");
+                throw new ApproovException(TAG + "Empty certificate chain from callback function.");
             JObject allPins;
             // 1. Get Approov pins
             var aString = GetPinsJSON();
@@ -691,13 +692,13 @@ namespace Approov
                 allPins = jsonContents;
             }
             catch (JsonReaderException e) {
-                throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK " + e.Message);
+                throw new ApproovException(TAG + "Unable to obtain pins from SDK " + e.Message);
             }
 
             //IDictionary<string, IList<string>> allPins = (IDictionary<string, IList<string>>)GetPins(kShaTypeString);
             if (allPins == null)
             {
-                throw new ApproovSDKException(TAG + "Unable to obtain pins from SDK");
+                throw new ApproovException(TAG + "Unable to obtain pins from SDK");
             }
 
             // 2. Get hostname => sender.RequestUri
@@ -727,7 +728,7 @@ namespace Approov
                     SHA256 certHash = SHA256.Create();
                     byte[] certHashBytes = certHash.ComputeHash(certificate.RawData);
                     string certHashBase64 = Convert.ToBase64String(certHashBytes);
-                    throw new ApproovSDKException(TAG + " Failed to extract Public Key from certificate for host " + hostname + ". Cert hash: " + certHashBase64);
+                    throw new ApproovException(TAG + " Failed to extract Public Key from certificate for host " + hostname + ". Cert hash: " + certHashBase64);
                 }
                 SHA256 hash = SHA256.Create();
                 byte[] hashBytes = hash.ComputeHash(pkiBytes);

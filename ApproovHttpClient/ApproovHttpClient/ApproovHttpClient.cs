@@ -350,7 +350,7 @@ namespace Approov
          */
         protected virtual HttpRequestMessage UpdateRequestHeadersWithApproov(HttpRequestMessage message)
         {
-            throw new ApproovSDKException(TAG + "UpdateRequestHeadersWithApproov must be overriden in platform specific implementations.");
+            throw new ApproovException(TAG + "UpdateRequestHeadersWithApproov must be overriden in platform specific implementations.");
         }
 
         /* 
@@ -628,36 +628,36 @@ namespace Approov
          */
         public virtual string GetPins(string pinType = "public-key-sha256")
         {
-            throw new ApproovSDKException(TAG + "GetPins must not be used; please, use GetPinsJSON instead.");
+            throw new ApproovException(TAG + "GetPins must not be used; please, use GetPinsJSON instead.");
         }
 
         /*
         *   Approov SDK exceptions
         */
-        public class ApproovSDKException : Exception
+        public class ApproovException : Exception
         {
             public bool ShouldRetry;
             public new string Message;
-            public ApproovSDKException()
+            public ApproovException()
             {
                 ShouldRetry = false;
-                Message = "ApproovSDKException: Unknown Error.";
+                Message = "ApproovException: Unknown Error.";
             }
 
-            public ApproovSDKException(string message) : base(message)
+            public ApproovException(string message) : base(message)
             {
                 ShouldRetry = false;
                 Message = message;
             }
 
-            public ApproovSDKException(string message, bool shouldRetry) : base(message)
+            public ApproovException(string message, bool shouldRetry) : base(message)
             {
                 ShouldRetry = shouldRetry;
                 Message = message;
             }
-        } // ApproovSDKException class
+        } // ApproovException class
         // initialization failure
-        public class InitializationFailureException : ApproovSDKException
+        public class InitializationFailureException : ApproovException
         {
             public InitializationFailureException(string message) : base(message)
             {
@@ -671,7 +671,7 @@ namespace Approov
             }
         }
         // configuration failure
-        public class ConfigurationFailureException : ApproovSDKException
+        public class ConfigurationFailureException : ApproovException
         {
             public ConfigurationFailureException(string message) : base(message)
             {
@@ -685,7 +685,7 @@ namespace Approov
             }
         }
         // pinning error
-        public class PinningErrorException : ApproovSDKException
+        public class PinningErrorException : ApproovException
         {
             public PinningErrorException(string message) : base(message)
             {
@@ -699,7 +699,7 @@ namespace Approov
             }
         }
         // networking error
-        public class NetworkingErrorException : ApproovSDKException
+        public class NetworkingErrorException : ApproovException
         {
             public NetworkingErrorException(string message) : base(message)
             {
@@ -713,7 +713,7 @@ namespace Approov
             }
         }
         // permanent error
-        public class PermanentException : ApproovSDKException
+        public class PermanentException : ApproovException
         {
             public PermanentException(string message) : base(message)
             {
@@ -727,16 +727,16 @@ namespace Approov
             }
         }
         // rejection error
-        public class RejectionException : ApproovSDKException
+        public class RejectionException : ApproovException
         {
             public string ARC;
-            public string Rejectionreasons;
+            public string RejectionReasons;
             public RejectionException(string message, string arc, string rejectionReasons)
             {
                 ShouldRetry = false;
                 Message = message;
                 ARC = arc;
-                Rejectionreasons = rejectionReasons;
+                RejectionReasons = rejectionReasons;
             }
         }
     }// class
