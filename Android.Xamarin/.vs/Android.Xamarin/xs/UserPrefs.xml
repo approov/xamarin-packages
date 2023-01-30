@@ -1,0 +1,28 @@
+﻿<Properties StartupConfiguration="{84B5FB50-00B4-4001-8131-DA8EA1977376}|Default">
+  <MonoDevelop.Ide.ItemProperties.Android.Xamarin PreferredExecutionTarget="Android.Nexus_S_API_28" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="ApproovService.cs">
+    <Files>
+      <File FileName="ApproovService.cs" Line="80" Column="12" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Android.Xamarin" expanded="True">
+            <Node name="Android.Xamarin" expanded="True">
+              <Node name="References" expanded="True" />
+              <Node name="Packages" expanded="True" />
+              <Node name="Jars" expanded="True" />
+              <Node name="ApproovService.cs" selected="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+</Properties>
