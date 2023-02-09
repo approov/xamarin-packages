@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-android</TargetFramework>
+    <TargetFramework>net6.0-android31.0</TargetFramework>
     <SupportedOSPlatformVersion>21</SupportedOSPlatformVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -14,11 +14,15 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="ApproovHttpClient" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Jars\" />
   </ItemGroup>
   <ItemGroup>
     <LibraryProjectZip Include="Jars\approov-sdk.aar" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="ApproovHttpClient" />
   </ItemGroup>
 </Project>

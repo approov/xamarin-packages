@@ -166,16 +166,21 @@ namespace Approov
             }
             // The return value
             HttpRequestMessage returnMessage = message;
-            // The url to protect
-            string url = message.RequestUri.AbsoluteUri;
-            // Optional BaseAddress set in the HttpClient, usually matches url
-            string urlWithBaseAddress = url;
-            // If the base address is included, we compute it so we call fetchToken with the full url
-            if (BaseAddress != null) urlWithBaseAddress = new Uri(BaseAddress + url).AbsoluteUri;
+            // Build the final url (we have to use to call FetchApproovToken)
+            string urlWithBaseAddress;
+            if ((BaseAddress != null) && (message.RequestUri != null))
+                urlWithBaseAddress = new Uri(BaseAddress, message.RequestUri).ToString();
+            else if (BaseAddress != null)
+                urlWithBaseAddress = BaseAddress.ToString();
+            else if (message.RequestUri != null)
+                urlWithBaseAddress = message.RequestUri.ToString();
+            else
+                throw new ApproovException(TAG + " Must set host in either ApproovHttpCLient.BaseAddress or GET/POST/PUT method");
+
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(urlWithBaseAddress))
             {
-                Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
+                Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + urlWithBaseAddress);
                 return returnMessage;
             }
 
@@ -369,7 +374,7 @@ namespace Approov
             {
                 originalQueryParams = new HashSet<string>(SubstitutionQueryParams);
             }
-            string urlString = url;
+            string urlString = urlWithBaseAddress;
             foreach (string entry in originalQueryParams)
             {
                 string pattern = entry;

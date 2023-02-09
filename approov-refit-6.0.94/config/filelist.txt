@@ -1,0 +1,2 @@
+**/Refit.*
+**/InterfaceStubGenerator.*

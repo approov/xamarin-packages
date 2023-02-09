@@ -1,11 +1,17 @@
 ﻿<Properties>
+  <Xamarin.Addins.Core.Project ActiveDebugTarget="Android.1A291FDF6000GS" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
   <MonoDevelop.Ide.Workbench ActiveDocument="ApproovService.cs">
     <Files>
-      <File FileName="ApiDefinition.cs" Line="1" Column="1" />
+      <File FileName="ApiDefinition.cs" />
       <File FileName="StructsAndEnums.cs" />
-      <File FileName="ApproovHttpClient.cs" Line="28" Column="38" />
       <File FileName="iOS.Xamarin.csproj" />
-      <File FileName="ApproovService.cs" Line="144" Column="18" />
+      <File FileName="ApproovService.cs" Line="856" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -15,17 +21,10 @@
               <Node name="References" expanded="True" />
               <Node name="NativeReferenceFolder" expanded="True" />
               <Node name="Packages" expanded="True" />
-              <Node name="ApproovService.cs" selected="True" />
             </Node>
           </Node>
         </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
-  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
-  <MonoDevelop.Ide.DebuggingService.Breakpoints>
-    <BreakpointStore />
-  </MonoDevelop.Ide.DebuggingService.Breakpoints>
-  <MultiItemStartupConfigurations />
 </Properties>

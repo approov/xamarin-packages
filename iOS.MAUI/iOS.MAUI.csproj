@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net7.0-ios</TargetFramework>
+    <TargetFramework>net6.0-ios</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <IsBindingProject>true</IsBindingProject>
@@ -12,11 +12,13 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Release</OutputPath>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Approov.xcframework" />
     <None Remove="Newtonsoft.Json" />
+    <None Remove="ApproovHttpClient" />
   </ItemGroup>
   <ItemGroup>
     <NativeReference Include="Approov.xcframework">
@@ -25,6 +27,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="ApproovHttpClient" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="ApiDefinition.cs" />

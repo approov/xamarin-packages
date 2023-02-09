@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <RootNamespace>Refit.Generator</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <AssemblyOriginatorKeyFile>..\buildtask.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <IsRoslynComponent>true</IsRoslynComponent>
+    <Nullable>enable</Nullable>
+    <Description>The automatic type-safe REST library for Xamarin and .NET with Approov SDK support.
+Based on Refit (https://github.com/reactiveui/refit)</Description>
+    <Company>CriticalBlue</Company>
+    <Authors>ivol@criticalblue.com</Authors>
+    <PackageProjectUrl>https://approov.io</PackageProjectUrl>
+    <PackageIcon>approov_logo.png</PackageIcon>
+    <PackageIconUrl />
+    <RepositoryUrl>https://github.com/approov/xamarin-packages/tree/release/6.0.94/approov-refit</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\ivo\source\repos\private\refit-6.0.94\refit_logo.png" />
+    <None Include="..\approov_logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ApproovHttpClient" Version="1.0.8" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
+  </ItemGroup>
+
+  <Target Name="SetBuildVer" AfterTargets="GetBuildVersion" BeforeTargets="SetCloudBuildVersionVars;SetCloudBuildNumberWithVersion">
+    <PropertyGroup>      
+      <Version>$(BuildVersion)</Version>
+      <AssemblyVersion>$(BuildVersionSimple)</AssemblyVersion>
+    </PropertyGroup>
+  </Target>
+
+</Project>

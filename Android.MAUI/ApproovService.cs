@@ -32,6 +32,9 @@ using System.Net.Http.Headers;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Java.Lang;
+using Java.Net;
+//using Internal;
+using System.Runtime.Intrinsics.Arm;
 
 namespace Approov
 {
@@ -138,16 +141,21 @@ namespace Approov
             }
             // The return value
             HttpRequestMessage returnMessage = message;
-            // The url to protect
-            string url = message.RequestUri.AbsoluteUri;
-            // Optional BaseAddress set in the HttpClient, usually matches url
-            string urlWithBaseAddress = url;
-            // If the base address is included, we compute it so we call fetchToken with the full url
-            if (BaseAddress != null) urlWithBaseAddress = new Uri(BaseAddress + url).AbsoluteUri;
+            // Build the final url (we have to use to call FetchApproovToken)
+            string urlWithBaseAddress;
+            if ((BaseAddress != null) && (message.RequestUri != null))
+                urlWithBaseAddress = new Uri(BaseAddress, message.RequestUri).ToString();
+            else if (BaseAddress != null)
+                urlWithBaseAddress = BaseAddress.ToString();
+            else if (message.RequestUri != null)
+                urlWithBaseAddress = message.RequestUri.ToString();
+            else
+                throw new ApproovException(TAG + " Must set host in either ApproovHttpCLient.BaseAddress or GET/POST/PUT method");
+
             // Check if the URL matches one of the exclusion regexs and just return if it does
             if (CheckURLIsExcluded(urlWithBaseAddress))
             {
-                Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + url);
+                Console.WriteLine(TAG + "UpdateRequestHeadersWithApproov excluded url " + urlWithBaseAddress);
                 return returnMessage;
             }
 
@@ -340,7 +348,7 @@ namespace Approov
             {
                 originalQueryParams = new HashSet<string>(SubstitutionQueryParams);
             }
-            string urlString = url;
+            string urlString = urlWithBaseAddress;
             foreach (string entry in originalQueryParams)
             {
                 string pattern = entry;
@@ -683,20 +691,17 @@ namespace Approov
             if (sslPolicyErrors != SslPolicyErrors.None)
                 return false;
 
-            if (chain.ChainElements.Count == 0)
+            try
             {
-                try
-                {
-                    chain.Build(cert);
-                    Console.WriteLine(TAG + "Certificate chain size:  " + chain.ChainElements.Count);
-                }
-                catch (System.Exception e)
-                {
-                    Console.WriteLine(TAG + "Failure building certificate chain " + e.Message + " for host " + sender.RequestUri.Host);
-                }
+                _ = chain.Build(cert);
             }
-            
+            catch (System.Exception e)
+            {
+                throw new ApproovException(TAG + "Exception attempting to build certificate chain: " + e.Message);
+            }
 
+            if (chain.ChainElements.Count == 0)
+                Console.WriteLine(TAG + "Empty certificate chain from callback function.");
             JObject allPins;
             // 1. Get Approov pins
             var aString = GetPinsJSON();
@@ -772,7 +777,7 @@ namespace Approov
 
         }
 
-    } // ApproovHttpClient
+    } // ApproovService
 
 
 
