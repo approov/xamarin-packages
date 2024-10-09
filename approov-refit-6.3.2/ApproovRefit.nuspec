@@ -16,12 +16,12 @@ Based on Refit (https://github.com/reactiveui/refit)</description>
         <dependency id="ApproovHttpClient" version="3.1.0" exclude="Build,Analyzers" />
         <dependency id="System.Net.Http" version="4.3.4" exclude="Build,Analyzers" />
         <dependency id="System.Net.Http.Json" version="6.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="6.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="6.0.10" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="net5.0">
         <dependency id="ApproovHttpClient" version="3.1.0" exclude="Build,Analyzers" />
         <dependency id="System.Net.Http.Json" version="6.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="6.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="6.0.10" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="net6.0">
         <dependency id="ApproovHttpClient" version="3.1.0" exclude="Build,Analyzers" />
@@ -30,12 +30,12 @@ Based on Refit (https://github.com/reactiveui/refit)</description>
       <group targetFramework=".NETStandard2.0">
         <dependency id="ApproovHttpClient" version="3.1.0" exclude="Build,Analyzers" />
         <dependency id="System.Net.Http.Json" version="6.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="6.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="6.0.10" exclude="Build,Analyzers" />
       </group>
       <group targetFramework=".NETStandard2.1">
         <dependency id="ApproovHttpClient" version="3.1.0" exclude="Build,Analyzers" />
         <dependency id="System.Net.Http.Json" version="6.0.0" exclude="Build,Analyzers" />
-        <dependency id="System.Text.Json" version="6.0.1" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="6.0.10" exclude="Build,Analyzers" />
       </group>
     </dependencies>
     <frameworkAssemblies>
