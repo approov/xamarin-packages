@@ -20,7 +20,7 @@
     <AssemblyName>ApproovRefit</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Condition="'$(TargetFramework)' != 'net6.0'" Include="System.Text.Json" Version="6.0.1" />
+    <PackageReference Condition="'$(TargetFramework)' != 'net6.0'" Include="System.Text.Json" Version="6.0.10" />
     <PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
     <PackageReference Include="ApproovHttpClient" Version="3.1.0" />
   </ItemGroup>
