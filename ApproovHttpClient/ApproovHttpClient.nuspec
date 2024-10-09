@@ -2,15 +2,15 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
   <metadata>
     <id>ApproovHttpClient</id>
-    <version>3.0.3</version>
+    <version>3.0.7</version>
     <authors>ApproovHttpClient</authors>
     <license type="expression">MIT</license>
     <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <icon>approov.png</icon>
     <projectUrl>https://approov.io/</projectUrl>
     <description>Custom HttpClient implementation using Approov API protection</description>
-    <releaseNotes>Add common SDK function as virtual and override in native packages</releaseNotes>
-    <copyright>Copyright Criticalblue 2020</copyright>
+    <releaseNotes>Target netstandard 2.0</releaseNotes>
+    <copyright>Copyright Criticalblue 2023</copyright>
     <tags>API Protection Attestation Mobile</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
@@ -19,7 +19,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="ApproovHttpClient/bin/Release/netstandard2.0/ApproovHttpClient.dll" target="lib/netstandard2.0/ApproovHttpClient.dll" />
-    <file src="ApproovHttpClient/approov.png" target="approov.png" />
+    <file src="bin/Release/netstandard2.0/ApproovHttpClient.dll" target="lib/netstandard2.0/ApproovHttpClient.dll" />
+    <file src="approov.png" target="approov.png" />
   </files>
 </package>

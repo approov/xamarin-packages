@@ -1,0 +1,30 @@
+﻿<Properties>
+  <Xamarin.Addins.Core.Project ActiveDebugTarget="Android.1A291FDF6000GS" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="ApproovService.cs">
+    <Files>
+      <File FileName="ApiDefinition.cs" />
+      <File FileName="StructsAndEnums.cs" />
+      <File FileName="iOS.Xamarin.csproj" />
+      <File FileName="ApproovService.cs" Line="856" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="iOS.Xamarin" expanded="True">
+            <Node name="iOS.Xamarin" expanded="True">
+              <Node name="References" expanded="True" />
+              <Node name="NativeReferenceFolder" expanded="True" />
+              <Node name="Packages" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+</Properties>

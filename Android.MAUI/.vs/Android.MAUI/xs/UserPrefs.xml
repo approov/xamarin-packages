@@ -1,0 +1,27 @@
+﻿<Properties>
+  <Xamarin.Addins.Core.Project ActiveDebugTarget="MonoDevelop.IPhone.IPhoneDeviceTarget" />
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Release" />
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MultiItemStartupConfigurations />
+  <MonoDevelop.Ide.Workbench ActiveDocument="ApproovService.cs">
+    <Files>
+      <File FileName="ApproovService.cs" Line="154" Column="1" />
+      <File FileName="ApproovSDK.MAUI.csproj" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Android.MAUI" expanded="True">
+            <Node name="ApproovSDK.MAUI" expanded="True">
+              <Node name="Dependencies" expanded="True" />
+              <Node name="Jars" expanded="True" />
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+</Properties>
